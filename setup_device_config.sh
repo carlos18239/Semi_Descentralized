@@ -9,7 +9,7 @@ if [ -z "$1" ]; then
     echo "  r3: 172.23.211.121 (Agent a3, puerto 50003)"
     echo "  r4: 172.23.211.247 (Agent a4, puerto 50004)"
     exit 1
-
+fi
 
 DEVICE=$1
 SETUPS_DIR="./setups"
