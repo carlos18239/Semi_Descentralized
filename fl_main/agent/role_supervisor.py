@@ -25,8 +25,18 @@ while True:
         role = 'agent'
 
     if role == 'aggregator':
-        # replace this process with the aggregator server
-        os.execvp(AGG_MODULE[0], AGG_MODULE + [])
+        # Start aggregator server
+        print(f"role_supervisor: role is 'aggregator', starting aggregator...")
+        try:
+            proc = subprocess.run(AGG_MODULE)
+        except KeyboardInterrupt:
+            raise
+        except Exception as e:
+            print(f"role_supervisor: aggregator run failed: {e}")
+            time.sleep(1)
+        # After aggregator exits, loop back to check role again
+        time.sleep(0.5)
+        continue
 
     # run the client (blocking)
     try:
