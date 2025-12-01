@@ -5,9 +5,9 @@ if [ -z "$1" ]; then
     echo "Usage: ./setup_device_config.sh <r1|r2|r3|r4>"
     echo ""
     echo "Este script configura los archivos JSON para cada dispositivo Raspberry Pi"
-    echo "  r1: 172.23.198.229 (Agent a2, puerto 50002)"
-    echo "  r2: 172.23.197.150 (Aggregator inicial, puerto 8765)"
-    echo "  r3: 172.23.198.244 (Agent a3, puerto 50003)"
+    echo "  r1: 172.23.211.138 (Agent a2, puerto 50002)"
+    echo "  r2: 172.23.211.117 (Aggregator inicial, puerto 8765)"
+    echo "  r3: 172.23.211.121 (Agent a3, puerto 50003)"
     echo "  r4: 172.23.211.247 (Agent a4, puerto 50004)"
     exit 1
 fi
@@ -17,11 +17,11 @@ SETUPS_DIR="./setups"
 
 case $DEVICE in
     r1)
-        echo "Configurando r1 (172.23.198.229) - Agent a2..."
+        echo "Configurando r1 (172.23.211.138) - Agent a2..."
         cat > "$SETUPS_DIR/config_agent.json" << 'EOF'
 {
-  "device_ip": "172.23.198.229",
-  "aggr_ip": "172.23.197.150",
+  "device_ip": "172.23.211.138",
+  "aggr_ip": "172.23.211.117",
   "reg_socket": "8765",
   "model_path": "./data/agents",
   "local_model_file_name": "lms.binaryfile",
@@ -35,8 +35,8 @@ EOF
 
         cat > "$SETUPS_DIR/config_aggregator.json" << 'EOF'
 {
-  "device_ip": "172.23.198.229",
-  "aggr_ip": "172.23.198.229",
+  "device_ip": "172.23.211.138",
+  "aggr_ip": "172.23.211.138",
   "db_ip": "172.23.211.109",
   "reg_socket": "50002",
   "exch_socket": "7890",
@@ -56,15 +56,15 @@ EOF
   "early_stopping_min_delta": 0.0001
 }
 EOF
-        echo "✓ r1 configurado con IP 172.23.198.229 y puerto 50002"
+        echo "✓ r1 configurado con IP 172.23.211.138 y puerto 50002"
         ;;
         
     r2)
-        echo "Configurando r2 (172.23.197.150) - Aggregator inicial..."
+        echo "Configurando r2 (172.23.211.117) - Aggregator inicial..."
         cat > "$SETUPS_DIR/config_agent.json" << 'EOF'
 {
-  "device_ip": "172.23.197.150",
-  "aggr_ip": "172.23.197.150",
+  "device_ip": "172.23.211.117",
+  "aggr_ip": "172.23.211.117",
   "reg_socket": "8765",
   "model_path": "./data/agents",
   "local_model_file_name": "lms.binaryfile",
@@ -78,8 +78,8 @@ EOF
 
         cat > "$SETUPS_DIR/config_aggregator.json" << 'EOF'
 {
-  "device_ip": "172.23.197.150",
-  "aggr_ip": "172.23.197.150",
+  "device_ip": "172.23.211.117",
+  "aggr_ip": "172.23.211.117",
   "db_ip": "172.23.211.109",
   "reg_socket": "8765",
   "exch_socket": "7890",
@@ -99,15 +99,15 @@ EOF
   "early_stopping_min_delta": 0.0001
 }
 EOF
-        echo "✓ r2 configurado con IP 172.23.197.150 y puerto 8765"
+        echo "✓ r2 configurado con IP 172.23.211.117 y puerto 8765"
         ;;
         
     r3)
-        echo "Configurando r3 (172.23.198.244) - Agent a3..."
+        echo "Configurando r3 (172.23.211.121) - Agent a3..."
         cat > "$SETUPS_DIR/config_agent.json" << 'EOF'
 {
-  "device_ip": "172.23.198.244",
-  "aggr_ip": "172.23.197.150",
+  "device_ip": "172.23.211.121",
+  "aggr_ip": "172.23.211.117",
   "reg_socket": "8765",
   "model_path": "./data/agents",
   "local_model_file_name": "lms.binaryfile",
@@ -121,8 +121,8 @@ EOF
 
         cat > "$SETUPS_DIR/config_aggregator.json" << 'EOF'
 {
-  "device_ip": "172.23.198.244",
-  "aggr_ip": "172.23.198.244",
+  "device_ip": "172.23.211.121",
+  "aggr_ip": "172.23.211.121",
   "db_ip": "172.23.211.109",
   "reg_socket": "50003",
   "exch_socket": "7890",
@@ -142,7 +142,7 @@ EOF
   "early_stopping_min_delta": 0.0001
 }
 EOF
-        echo "✓ r3 configurado con IP 172.23.198.244 y puerto 50003"
+        echo "✓ r3 configurado con IP 172.23.211.121 y puerto 50003"
         ;;
         
     r4)
@@ -150,7 +150,7 @@ EOF
         cat > "$SETUPS_DIR/config_agent.json" << 'EOF'
 {
   "device_ip": "172.23.211.247",
-  "aggr_ip": "172.23.197.150",
+  "aggr_ip": "172.23.211.117",
   "reg_socket": "8765",
   "model_path": "./data/agents",
   "local_model_file_name": "lms.binaryfile",
