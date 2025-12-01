@@ -555,7 +555,7 @@ class Client:
             cfg_agent = read_config(config_agent_file)
             cfg_agent['role'] = 'aggregator'
             cfg_agent['aggr_ip'] = device_ip
-            write_config(cfg_agent, config_agent_file)
+            write_config(config_agent_file, cfg_agent)  # Fixed: correct parameter order
             logging.info(f'✏️  Updated {config_agent_file}: role=aggregator, aggr_ip={device_ip}')
             
             # Update aggregator config: set correct IP
@@ -565,7 +565,7 @@ class Client:
             # Also update device_ip if not already set
             if not cfg_aggr.get('device_ip') or cfg_aggr.get('device_ip') == 'CHANGE_ME':
                 cfg_aggr['device_ip'] = device_ip
-            write_config(cfg_aggr, config_aggr_file)
+            write_config(config_aggr_file, cfg_aggr)  # Fixed: correct parameter order
             logging.info(f'✏️  Updated {config_aggr_file}: aggr_ip={device_ip}')
             
         except Exception as e:
