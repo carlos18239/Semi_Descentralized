@@ -53,6 +53,7 @@ Testing and debugging tips specific to this repo
 - To simulate multiple agents on one machine, run multiple `examples.minimal.minimal_MLEngine` with different `gm_recv_port` and `agent_name` arguments.
 - Rotation behavior: aggregator may `os._exit(0)` to yield the role; `role_supervisor.py` will restart appropriate process based on `role` in configs. Avoid in-place edits that assume the process remains running after rotation.
 - **Database errors**: "unable to open database file" means the `db_data_path` directory (default `./db`) doesn't exist. The aggregator now auto-creates it, but ensure you run from repo root where `setups/config_*.json` are visible.
+- **Log noise**: Background agent wait routine now uses `agent_wait_interval` (default 10s). `cleanup_old_agents` logs at INFO only when rows deleted; enable DEBUG to see periodic scans.
 
 Guidance for AI code edits
 - Prefer focused, minimal changes. This codebase relies on strict message ordering and pickled objects — refactors that change list orders/types must update both ends and `messengers.py` and `states.py` simultaneously.

@@ -186,7 +186,11 @@ class SQLiteDBHandler:
             c.execute("DELETE FROM agents WHERE last_seen IS NULL OR last_seen < ?;", (cutoff,))
             deleted = c.rowcount
             conn.commit()
-            logging.info(f"SQLiteDBHandler: cleanup_old_agents removed {deleted} stale agents older than {ttl_seconds}s")
+            # Reduce log noise: only INFO if something was deleted, otherwise DEBUG
+            if deleted > 0:
+                logging.info(f"SQLiteDBHandler: cleanup_old_agents removed {deleted} stale agents older than {ttl_seconds}s")
+            else:
+                logging.debug(f"SQLiteDBHandler: cleanup_old_agents found 0 stale agents (ttl={ttl_seconds}s)")
         except Exception as e:
             logging.error(f"Error during cleanup_old_agents: {e}")
         finally:

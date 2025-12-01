@@ -1,4 +1,4 @@
-import asyncio, logging, time, numpy as np
+import asyncio, logging, time, numpy as np, pickle
 import websockets
 from typing import List, Dict, Any
 import random
@@ -74,6 +74,8 @@ class Server:
         self.sm.agg_threshold = self.config['aggregation_threshold']
 
         self.is_polling = bool(self.config['polling'])
+        # Interval between agent reachability checks (seconds) to avoid log spam
+        self.agent_wait_interval = int(self.config.get('agent_wait_interval', 10))
         # TTL (in seconds) to consider DB agent entries stale and eligible for cleanup
         self.agent_ttl_seconds = int(self.config.get('agent_ttl_seconds', 300))
         self._init_round_from_db()
@@ -160,7 +162,7 @@ class Server:
                     logging.debug(f'Agente {agent_id} no disponible aún en {ip}:{socket}')
 
             # Sleep some time before next poll; keep light frequency
-            await asyncio.sleep(2)
+            await asyncio.sleep(self.agent_wait_interval)
     
     async def register(self, websocket: str, path):
         """
@@ -419,54 +421,73 @@ class Server:
         return await self._push_models(self.sm.id, ModelType.cluster, models, model_id, time.time(), meta_dict)
 
     async def _choose_and_broadcast_new_aggregator(self):
-        # Use the set of currently-connected agents from StateManager to
-        # avoid sending rotation messages to stale DB addresses.
+        # Collect candidate agents (connected)
         agents = list(self.sm.agent_set)
-        # If no connected agents, try DB as fallback
         if not agents:
-            rows = self.dbhandler.get_all_agents()  # (agent_id, ip, socket)
+            rows = self.dbhandler.get_all_agents()
             if not rows:
                 logging.info("No agents available for rotation.")
                 return
             agents = [{'agent_id': aid, 'agent_ip': ip, 'socket': int(sock)} for (aid, ip, sock) in rows]
 
-        # generate random scores for connected agents
-        scores = {}
-        for agent in agents:
-            scores[agent['agent_id']] = random.randint(1, 10)
-        # include current aggregator as candidate
+        # Generate random scores (including self)
+        scores = {a['agent_id']: random.randint(1, 10) for a in agents}
         scores[self.sm.id] = random.randint(1, 10)
 
-        # choose winner: highest score then lexicographically by id
         winner, winner_score = max(scores.items(), key=lambda kv: (kv[1], kv[0]))
 
-        # find winner ip/socket among connected agents; if winner is this aggregator, use local config
-        winner_ip, winner_sock = None, None
+        # Determine winner address
         if winner == self.sm.id:
             winner_ip = self.aggr_ip
             winner_sock = int(self.reg_socket)
         else:
+            winner_ip, winner_sock = None, None
             for agent in agents:
                 if agent['agent_id'] == winner:
-                    winner_ip = agent.get('agent_ip')
-                    winner_sock = int(agent.get('socket'))
+                    winner_ip = agent['agent_ip']
+                    winner_sock = int(agent['socket'])
                     break
+        if winner_ip is None:
+            logging.error("Rotation aborted: winner IP/socket not found")
+            return
 
-        # prepare rotation message and current cluster model
         model_id = self.sm.cluster_model_ids[-1] if self.sm.cluster_model_ids else ''
         models = convert_LDict_to_Dict(self.sm.cluster_models)
-
         rot_msg = generate_rotation_message(winner, winner_ip, winner_sock, model_id, self.sm.round, models, scores)
 
-        # send rotation message to connected agents
-        for agent in agents:
+        async def _send_rotation_direct(msg, ip, socket_num):
+            wsaddr = f'ws://{ip}:{socket_num}'
             try:
-                await send(rot_msg, agent['agent_ip'], int(agent['socket']))
-                logging.info(f'Sent rotation message to {agent.get("agent_id")} at {agent.get("agent_ip")}:{agent.get("socket")}')
+                async with websockets.connect(wsaddr, ping_interval=None) as websocket:
+                    await websocket.send(pickle.dumps(msg))
+                return True
             except Exception as e:
-                logging.error(f'Failed to send rotation to {agent.get("agent_id")} at {agent.get("agent_ip")}:{agent.get("socket")} : {e}')
+                logging.debug(f'Rotation send attempt failed to {ip}:{socket_num} -> {e}')
+                return False
 
-        # persist local config changes (this node will stop being aggregator)
+        # Retry delivery to all; especially winner must succeed
+        winner_delivered = False
+        max_attempts = 5
+        for attempt in range(1, max_attempts + 1):
+            logging.info(f'Rotation broadcast attempt {attempt}/{max_attempts}')
+            # Send to each agent
+            for agent in agents:
+                delivered = await _send_rotation_direct(rot_msg, agent['agent_ip'], int(agent['socket']))
+                if delivered:
+                    logging.info(f'Rotation message delivered to {agent["agent_id"]} at {agent["agent_ip"]}:{agent["socket"]}')
+                else:
+                    logging.warning(f'Rotation message NOT delivered to {agent["agent_id"]} at {agent["agent_ip"]}:{agent["socket"]}')
+                if agent['agent_id'] == winner and delivered:
+                    winner_delivered = True
+            if winner_delivered:
+                break
+            await asyncio.sleep(2)
+
+        if not winner_delivered:
+            logging.error('Rotation failed: winner did not receive rotation message after retries; keeping current role.')
+            return
+
+        # Persist config changes for this node (demote self)
         try:
             cfg_agent_file = set_config_file('agent')
             cfg_agent = read_config(cfg_agent_file)
@@ -482,9 +503,7 @@ class Server:
         except Exception as e:
             logging.error(f'Failed to persist local config change after rotation: {e}')
 
-        logging.info(f'Rotation completed. Selected new aggregator {winner} ({winner_ip}:{winner_sock}) score {winner_score}')
-
-        # Exit now to yield aggregator role (supervisor/classification_engine should restart in agent mode)
+        logging.info(f'Rotation completed. New aggregator {winner} ({winner_ip}:{winner_sock}) score {winner_score}; exiting to yield role.')
         os._exit(0)
 
 
