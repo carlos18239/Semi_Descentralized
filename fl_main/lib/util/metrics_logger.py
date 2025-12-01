@@ -28,10 +28,8 @@ class MetricsLogger:
         # Create metrics directory if it doesn't exist
         self.log_dir.mkdir(parents=True, exist_ok=True)
         
-        # CSV filename with timestamp
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        self.csv_file = self.log_dir / f"metrics_{agent_name}_{timestamp}.csv"
-        
+        # CSV filename - FIXED name (no timestamp) for continuous updates
+        self.csv_file = self.log_dir / f"metrics_aggregator.csv"
         # CSV headers
         self.headers = [
             'timestamp',
@@ -172,10 +170,15 @@ class AggregatorMetricsLogger:
         logging.info(f"AggregatorMetricsLogger initialized: {self.csv_file}")
     
     def _init_csv(self):
-        """Create CSV file with headers"""
-        with open(self.csv_file, 'w', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=self.headers)
-            writer.writeheader()
+        """Create CSV file with headers if it doesn't exist, otherwise append"""
+        # Only write header if file doesn't exist
+        if not self.csv_file.exists():
+            with open(self.csv_file, 'w', newline='') as f:
+                writer = csv.DictWriter(f, fieldnames=self.headers)
+                writer.writeheader()
+            logging.info(f"Created new CSV: {self.csv_file}")
+        else:
+            logging.info(f"Appending to existing CSV: {self.csv_file}")
     
     def log_round(self,
                   round_num,

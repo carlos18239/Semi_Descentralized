@@ -488,6 +488,11 @@ class Server:
             # We need to wait for ALL agents in DB, not just those in current round
             all_db_agents = self.dbhandler.get_all_agents()
             all_agent_ids = {aid for (aid, ip, sock) in all_db_agents}
+            # Safety check: if no agents in DB, something is wrong
+            if len(all_agent_ids) == 0:
+                logging.warning("No agents in DB during rotation check - skipping rotation")
+                self.pending_rotation_msg = None
+                return
             if all_agent_ids.issubset(self.rotation_notified_agents):
                 logging.info(f'All {len(all_agent_ids)} agents notified of rotation.')
                 
@@ -614,14 +619,16 @@ class Server:
                 # before rotation happens
                 should_rotate = (
                     self.sm.round >= self.rotation_min_rounds and
-                    (self.sm.round - self.last_rotation_round) >= self.rotation_interval
+                    (self.sm.round - self.last_rotation_round) >= self.rotation_interval and
+                    len(self.sm.agent_set) > 0  # Safety: only rotate if we have agents
                 )
                 
                 if should_rotate:
                     # Broadcast rotation and choose next aggregator
+                    logging.info(f"🔄 Initiating rotation at round {self.sm.round}")
                     await self._choose_and_broadcast_new_aggregator()
                     self.last_rotation_round = self.sm.round
-                    logging.info(f"Rotation scheduled at round {self.sm.round}")
+                    logging.info(f"✅ Rotation scheduled at round {self.sm.round}")
 
     async def _send_cluster_models_to_all(self):
         """
