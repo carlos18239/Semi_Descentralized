@@ -114,6 +114,7 @@ class Server:
         self.early_stopping_patience = int(self.config.get('early_stopping_patience', 120))
         self.early_stopping_min_delta = float(self.config.get('early_stopping_min_delta', 0.0001))
         self.best_global_recall = 0.0
+        self.last_global_recall = None  # Most recent global recall calculated
         self.rounds_without_improvement = 0
         self.current_round_recalls = {}  # agent_id -> recall_value
         self.global_recall_history = []  # history of global recalls
@@ -408,6 +409,7 @@ class Server:
             # Calculate global recall (average)
             global_recall = sum(self.current_round_recalls.values()) / len(self.current_round_recalls)
             self.global_recall_history.append(global_recall)
+            self.last_global_recall = global_recall  # Store for metrics logging
             
             logging.info(f'=== GLOBAL RECALL (Round {self.sm.round}): {global_recall:.4f} ===')
             logging.info(f'Individual recalls: {self.current_round_recalls}')
@@ -627,7 +629,7 @@ class Server:
                 self.metrics_logger.log_round(
                     round_num=self.sm.round,
                     num_agents=len(self.sm.agent_set),
-                    global_recall=self.best_global_recall if self.best_global_recall > 0 else None,
+                    global_recall=self.last_global_recall,  # Use last calculated recall
                     aggregation_time=aggregation_time,
                     models_received=self.round_models_received,
                     bytes_received=self.round_bytes_received,
