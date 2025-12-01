@@ -116,6 +116,19 @@ class PseudoDB:
             else:
                 reply = ['election_failed', 'no_candidates']
                 logging.warning(f'   Election failed: no candidates provided')
+                
+        elif msg_type == DBMsgType.update_aggregator.value:  # update aggregator FL socket
+            # msg format: [msg_type, agent_id, aggr_ip, aggr_socket]
+            # This is sent by the winner after promotion to update with FL socket (50001)
+            if len(msg) >= 4:
+                agent_id, aggr_ip, aggr_socket = msg[1], msg[2], msg[3]
+                logging.info(f'--- Aggregator socket update: {aggr_ip}:{aggr_socket} ---')
+                self.dbhandler.update_current_aggregator(agent_id, aggr_ip, aggr_socket)
+                reply = ['updated']
+                logging.info(f'   Updated aggregator to FL socket: {aggr_ip}:{aggr_socket}')
+            else:
+                reply = ['update_failed', 'invalid_message']
+                logging.error(f'   Invalid update_aggregator message format')
         else:
             # Error for undefined message type
             logging.error(f'Undefined DB Access Message Type: {msg_type}')

@@ -31,6 +31,7 @@ class DBMsgType(Enum):
     register_agent = 1
     get_aggregator = 2
     elect_aggregator = 3
+    update_aggregator = 4
 
 class AgentMsgType(Enum):
     """

@@ -655,6 +655,21 @@ class Client:
             logging.error(f'Failed to promote to aggregator: {e}')
             raise
 
+    async def _update_aggregator_in_db(self, aggr_ip: str, aggr_socket: str):
+        """
+        Update DB with the correct aggregator FL exchange socket after promotion.
+        This ensures other agents connect to the right port (50001, not 8765).
+        """
+        try:
+            msg = [DBMsgType.update_aggregator.value, self.id, aggr_ip, int(aggr_socket)]
+            reply = await send(msg, self.db_ip, int(self.db_socket))
+            if reply and reply[0] == 'updated':
+                logging.info(f'✅ Updated DB with aggregator FL socket: {aggr_ip}:{aggr_socket}')
+            else:
+                logging.warning(f'⚠️  DB update response: {reply}')
+        except Exception as e:
+            logging.error(f'Failed to update aggregator in DB: {e}')
+
     async def _register_in_db(self):
         """
         Register this agent in the centralized DB with a random score for election.
