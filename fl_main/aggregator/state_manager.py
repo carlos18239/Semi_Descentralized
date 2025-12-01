@@ -61,10 +61,22 @@ class StateManager:
         """
         if len(self.mnames) == 0:
             return False
+        
+        # STRICT: If no agents registered, cannot aggregate
+        if len(self.agent_set) == 0:
+            logging.warning(f'--- Cannot aggregate: No agents registered in agent_set ---')
+            return False
 
+        # Calculate required number of agents based on threshold
         num_agents = int(self.agg_threshold * len(self.agent_set))
-        if num_agents == 0: num_agents = 1
-        logging.info(f'--- Aggregation Threshold (Number of agents needed for aggregation): {num_agents} ---')
+        
+        # STRICT: If threshold is 1.0 (100%), require ALL agents
+        if self.agg_threshold >= 1.0:
+            num_agents = len(self.agent_set)
+        elif num_agents == 0:
+            num_agents = 1  # Minimum 1 agent if threshold rounds to 0
+        
+        logging.info(f'--- Aggregation Threshold: {self.agg_threshold} (need {num_agents}/{len(self.agent_set)} agents) ---')
 
         num_collected_lmodels = len(self.local_model_buffers[self.mnames[0]])
         logging.info(f'--- Number of collected local models: {num_collected_lmodels} ---')
@@ -73,7 +85,7 @@ class StateManager:
             logging.info(f'--- Enough local models are collected. Aggregation will start. ---')
             return True
         else:
-            logging.info(f'--- Waiting for more local models to be collected ---')
+            logging.info(f'--- Waiting for more local models: {num_collected_lmodels}/{num_agents} ---')
             return False
 
     def initialize_model_info(self, lmodels, init_weights_flag):

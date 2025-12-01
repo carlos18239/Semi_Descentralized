@@ -596,11 +596,12 @@ class Server:
             await asyncio.sleep(self.round_interval)
             
             # --- ROBUST RECONNECTION: Sync agent_set with DB before aggregation ---
-            # This ensures agent_set reflects only currently alive agents (not stale)
+            # IMPORTANT: Only sync FROM DB to memory, never clear memory if DB is empty
+            # This prevents race condition where cleanup_old_agents runs before agents re-register
             try:
                 db_agents = self.dbhandler.get_all_agents()
-                if db_agents:
-                    # Rebuild agent_set from DB
+                if db_agents and len(db_agents) > 0:
+                    # Rebuild agent_set from DB (authoritative source)
                     synced_agent_set = []
                     for agent_id, agent_ip, agent_socket in db_agents:
                         # Try to match with existing agent in agent_set to preserve agent_name
@@ -622,9 +623,12 @@ class Server:
                     if len(synced_agent_set) != len(self.sm.agent_set):
                         logging.info(f"🔄 Agent_set synced with DB: {len(self.sm.agent_set)} -> {len(synced_agent_set)} agents")
                     self.sm.agent_set = synced_agent_set
+                elif len(self.sm.agent_set) == 0:
+                    # Both DB and memory are empty - this is normal at startup
+                    logging.debug("Waiting for agents to connect...")
                 else:
-                    logging.warning("No agents in DB during sync - clearing agent_set")
-                    self.sm.agent_set = []
+                    # DB is empty but memory has agents - keep memory, they might be registering
+                    logging.debug(f"DB empty but agent_set has {len(self.sm.agent_set)} agents - keeping memory")
             except Exception as e:
                 logging.error(f"Failed to sync agent_set with DB: {e}")
 

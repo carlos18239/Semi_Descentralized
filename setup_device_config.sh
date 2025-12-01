@@ -4,7 +4,7 @@ if [ -z "$1" ]; then
     echo "Usage: ./setup_device_config.sh <r1|r2|r3|r4>"
     echo ""
     echo "Este script configura los archivos JSON para cada dispositivo Raspberry Pi"
-    echo "  r1: 172.23.211.138 (Agent a2, puerto 50002)"
+    echo "  r1: 172.23.211.138 (Agent a1, puerto 50001)"
     echo "  r2: 172.23.211.117 (Aggregator inicial, puerto 8765)"
     echo "  r3: 172.23.211.121 (Agent a3, puerto 50003)"
     echo "  r4: 172.23.211.247 (Agent a4, puerto 50004)"
@@ -16,7 +16,7 @@ SETUPS_DIR="./setups"
 
 case $DEVICE in
     r1)
-        echo "Configurando r1 (172.23.211.138) - Agent a2..."
+        echo "Configurando r1 (172.23.211.138) - Agent a1..."
         cat > "$SETUPS_DIR/config_agent.json" << 'EOF'
 {
   "device_ip": "172.23.211.138",
@@ -37,7 +37,7 @@ EOF
   "device_ip": "172.23.211.138",
   "aggr_ip": "172.23.211.138",
   "db_ip": "172.23.211.109",
-  "reg_socket": "50002",
+  "reg_socket": "50001",
   "exch_socket": "7890",
   "recv_socket": "4321",
   "db_socket": "9017",
@@ -49,13 +49,14 @@ EOF
   "rotation_interval": 3,
   "rotation_delay": 20,
   "agent_wait_interval": 10,
-  "agent_ttl_seconds": 300,
+  "agent_ttl_seconds": 600,
+  "aggregation_timeout": 120,
   "max_rounds": 100,
   "early_stopping_patience": 120,
   "early_stopping_min_delta": 0.0001
 }
 EOF
-        echo "✓ r1 configurado con IP 172.23.211.138 y puerto 50002"
+        echo "✓ r1 configurado con IP 172.23.211.138 y puerto 50001"
         ;;
         
     r2)
@@ -92,7 +93,8 @@ EOF
   "rotation_interval": 3,
   "rotation_delay": 20,
   "agent_wait_interval": 10,
-  "agent_ttl_seconds": 300,
+  "agent_ttl_seconds": 600,
+  "aggregation_timeout": 120,
   "max_rounds": 100,
   "early_stopping_patience": 120,
   "early_stopping_min_delta": 0.0001
@@ -135,7 +137,8 @@ EOF
   "rotation_interval": 3,
   "rotation_delay": 20,
   "agent_wait_interval": 10,
-  "agent_ttl_seconds": 300,
+  "agent_ttl_seconds": 600,
+  "aggregation_timeout": 120,
   "max_rounds": 100,
   "early_stopping_patience": 120,
   "early_stopping_min_delta": 0.0001
@@ -178,7 +181,8 @@ EOF
   "rotation_interval": 3,
   "rotation_delay": 20,
   "agent_wait_interval": 10,
-  "agent_ttl_seconds": 300,
+  "agent_ttl_seconds": 600,
+  "aggregation_timeout": 120,
   "max_rounds": 100,
   "early_stopping_patience": 120,
   "early_stopping_min_delta": 0.0001
