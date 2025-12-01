@@ -93,6 +93,8 @@ class Server:
         self.agent_ttl_seconds = int(self.config.get('agent_ttl_seconds', 300))
         # Pending rotation message (for polling mode)
         self.pending_rotation_msg = None
+        # Track which agents have received rotation (set of agent_ids)
+        self.rotation_notified_agents = set()
         self._init_round_from_db()
         # Load agent entries from DB into a pending list. Actual connection
         # and adding to StateManager happens in a background coroutine
@@ -344,6 +346,38 @@ class Server:
         if self.pending_rotation_msg is not None:
             await send_websocket(self.pending_rotation_msg, websocket)
             logging.info(f'--- Rotation message sent to {agent_id} via polling ---')
+            self.rotation_notified_agents.add(agent_id)
+            
+            # Check if all active agents have been notified
+            active_agent_ids = {a['agent_id'] for a in self.sm.agents}
+            if active_agent_ids.issubset(self.rotation_notified_agents):
+                logging.info(f'All {len(active_agent_ids)} agents notified of rotation. Exiting to yield role.')
+                # Persist config changes before exiting
+                try:
+                    winner_info = self.pending_rotation_msg
+                    winner_ip = winner_info[int(RotationMSGLocation.new_aggregator_ip)]
+                    winner_sock = winner_info[int(RotationMSGLocation.new_aggregator_reg_socket)]
+                    
+                    cfg_agent_file = set_config_file('agent')
+                    cfg_agent = read_config(cfg_agent_file)
+                    cfg_agent['role'] = 'agent'
+                    cfg_agent['aggr_ip'] = winner_ip
+                    cfg_agent['reg_socket'] = str(winner_sock)
+                    write_config(cfg_agent_file, cfg_agent)
+
+                    cfg_aggr_file = set_config_file('aggregator')
+                    cfg_aggr = read_config(cfg_aggr_file)
+                    cfg_aggr['aggr_ip'] = winner_ip
+                    cfg_aggr['reg_socket'] = str(winner_sock)
+                    cfg_aggr['role'] = 'agent'
+                    write_config(cfg_aggr_file, cfg_aggr)
+                    logging.info(f'Config persisted: now agent pointing to {winner_ip}:{winner_sock}')
+                except Exception as e:
+                    logging.error(f'Failed to persist config after rotation: {e}')
+                os._exit(0)
+            else:
+                remaining = active_agent_ids - self.rotation_notified_agents
+                logging.info(f'Rotation sent to {agent_id}. Waiting for {len(remaining)} more agents: {remaining}')
             return
         
         # Priority 2: Check for new global model
@@ -480,9 +514,11 @@ class Server:
         # In polling mode, store rotation message for delivery via next poll
         if self.is_polling:
             self.pending_rotation_msg = rot_msg
+            self.rotation_notified_agents = set()  # Reset tracking
             logging.info(f'Rotation prepared for polling delivery. Winner: {winner} ({winner_ip}:{winner_sock}) score {winner_score}')
-            # Give agents a moment to poll and receive rotation
-            await asyncio.sleep(3)
+            logging.info(f'Waiting for all {len(self.sm.agents)} agents to poll and receive rotation...')
+            # Exit will happen in _process_polling after all agents notified
+            return
         else:
             # Push mode: actively send rotation to agents
             async def _send_rotation_direct(msg, ip, socket_num):
