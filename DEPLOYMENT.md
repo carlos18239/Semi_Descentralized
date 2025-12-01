@@ -121,21 +121,24 @@ cd /path/to/simple-fl
 python -m fl_main.pseudodb.pseudo_db
 ```
 
-### 2. Start r2 as Initial Aggregator
+### 2. Start r2 as Initial Aggregator (con supervisor)
 ```bash
 cd /path/to/simple-fl
 # Asegúrate que config_aggregator.json tenga device_ip="172.23.197.150"
-python -m fl_main.aggregator.server_th
+# El supervisor permite que el aggregator cambie a agent automáticamente
+python -m fl_main.aggregator.role_supervisor 1 8765 a_aggregator
 ```
 
-### 3. Start r1 as Agent a2
+**Nota**: El supervisor del aggregator necesita los argumentos `<simulation_flag> <port> <agent_name>` para poder reiniciar como cliente si pierde la rotación.
+
+### 3. Start r1 as Agent a2 (con supervisor)
 ```bash
 cd /path/to/simple-fl
 # Asegúrate que config_agent.json tenga device_ip="172.23.198.229"
 python -m fl_main.agent.role_supervisor 1 50002 a2
 ```
 
-### 4. Start r3 as Agent a3
+### 4. Start r3 as Agent a3 (con supervisor)
 ```bash
 cd /path/to/simple-fl
 # Asegúrate que config_agent.json tenga device_ip="172.23.198.244"
@@ -147,7 +150,7 @@ python -m fl_main.agent.role_supervisor 1 50003 a3
 1. **Aggregation**: El aggregator recolecta modelos de los agentes y agrega cada `round_interval` segundos
 2. **Rotation Decision**: Después de la agregación, el aggregator decide aleatoriamente si rotar basándose en scores
 3. **Rotation Message**: El agregador guarda el mensaje de rotación en `pending_rotation_msg`
-4. **Message Delivery**: Cuando los agentes hacen polling, reciben el mensaje de rotación como prioridad
+4. **Message Delivery**: Cuando **todos** los agentes registrados en la DB hacen polling, reciben el mensaje de rotación como prioridad
 5. **Winner Promotion**: 
    - El agente ganador actualiza `config_agent.json` y `config_aggregator.json`
    - Cambia `role` a `"aggregator"`
@@ -158,6 +161,13 @@ python -m fl_main.agent.role_supervisor 1 50003 a3
    - Los agentes perdedores actualizan `self.aggr_ip` y `self.reg_socket` en memoria
    - Se reconectan al nuevo aggregator
    - Continúan operando como agentes
+7. **Aggregator Demotion**:
+   - Si el aggregator actual **no** ganó la rotación, después de notificar a todos los agentes:
+     - Actualiza `config_aggregator.json` y `config_agent.json` cambiando `role` a `"agent"`
+     - Actualiza `aggr_ip` y `reg_socket` para apuntar al nuevo aggregator
+     - Llama `os._exit(0)` para que `role_supervisor` lo reinicie como cliente
+   - Si el aggregator actual **sí** ganó la rotación:
+     - Limpia el estado de rotación y continúa operando como aggregator
 
 ## Important Notes
 

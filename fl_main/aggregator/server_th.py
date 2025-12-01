@@ -93,6 +93,8 @@ class Server:
         self.agent_ttl_seconds = int(self.config.get('agent_ttl_seconds', 300))
         # Pending rotation message (for polling mode)
         self.pending_rotation_msg = None
+        # Track rotation winner ID
+        self.rotation_winner_id = None
         # Track which agents have received rotation (set of agent_ids)
         self.rotation_notified_agents = set()
         self._init_round_from_db()
@@ -348,35 +350,49 @@ class Server:
             logging.info(f'--- Rotation message sent to {agent_id} via polling ---')
             self.rotation_notified_agents.add(agent_id)
             
-            # Check if all active agents have been notified
-            active_agent_ids = {a['agent_id'] for a in self.sm.agent_set}
-            if active_agent_ids.issubset(self.rotation_notified_agents):
-                logging.info(f'All {len(active_agent_ids)} agents notified of rotation. Exiting to yield role.')
-                # Persist config changes before exiting
-                try:
-                    winner_info = self.pending_rotation_msg
-                    winner_ip = winner_info[int(RotationMSGLocation.new_aggregator_ip)]
-                    winner_sock = winner_info[int(RotationMSGLocation.new_aggregator_reg_socket)]
-                    
-                    cfg_agent_file = set_config_file('agent')
-                    cfg_agent = read_config(cfg_agent_file)
-                    cfg_agent['role'] = 'agent'
-                    cfg_agent['aggr_ip'] = winner_ip
-                    cfg_agent['reg_socket'] = str(winner_sock)
-                    write_config(cfg_agent_file, cfg_agent)
+            # Check if all registered agents in DB have been notified
+            # We need to wait for ALL agents in DB, not just those in current round
+            all_db_agents = self.dbhandler.get_all_agents()
+            all_agent_ids = {aid for (aid, ip, sock) in all_db_agents}
+            if all_agent_ids.issubset(self.rotation_notified_agents):
+                logging.info(f'All {len(all_agent_ids)} agents notified of rotation.')
+                
+                winner_info = self.pending_rotation_msg
+                winner_id = winner_info[int(RotationMSGLocation.new_aggregator_id)]
+                winner_ip = winner_info[int(RotationMSGLocation.new_aggregator_ip)]
+                winner_sock = winner_info[int(RotationMSGLocation.new_aggregator_reg_socket)]
+                
+                # Check if THIS aggregator is the winner
+                if self.sm.id == winner_id:
+                    logging.info(f'This aggregator won the rotation. Staying as aggregator.')
+                    # Clear rotation state and continue as aggregator
+                    self.pending_rotation_msg = None
+                    self.rotation_winner_id = None
+                    self.rotation_notified_agents = set()
+                    return
+                else:
+                    logging.info(f'This aggregator lost the rotation. Changing to agent role and exiting.')
+                    # Persist config changes before exiting - change to agent
+                    try:
+                        cfg_agent_file = set_config_file('agent')
+                        cfg_agent = read_config(cfg_agent_file)
+                        cfg_agent['role'] = 'agent'
+                        cfg_agent['aggr_ip'] = winner_ip
+                        cfg_agent['reg_socket'] = str(winner_sock)
+                        write_config(cfg_agent_file, cfg_agent)
 
-                    cfg_aggr_file = set_config_file('aggregator')
-                    cfg_aggr = read_config(cfg_aggr_file)
-                    cfg_aggr['aggr_ip'] = winner_ip
-                    cfg_aggr['reg_socket'] = str(winner_sock)
-                    cfg_aggr['role'] = 'agent'
-                    write_config(cfg_aggr_file, cfg_aggr)
-                    logging.info(f'Config persisted: now agent pointing to {winner_ip}:{winner_sock}')
-                except Exception as e:
-                    logging.error(f'Failed to persist config after rotation: {e}')
-                os._exit(0)
+                        cfg_aggr_file = set_config_file('aggregator')
+                        cfg_aggr = read_config(cfg_aggr_file)
+                        cfg_aggr['aggr_ip'] = winner_ip
+                        cfg_aggr['reg_socket'] = str(winner_sock)
+                        cfg_aggr['role'] = 'agent'
+                        write_config(cfg_aggr_file, cfg_aggr)
+                        logging.info(f'Config persisted: now agent pointing to {winner_ip}:{winner_sock}')
+                    except Exception as e:
+                        logging.error(f'Failed to persist config after rotation: {e}')
+                    os._exit(0)
             else:
-                remaining = active_agent_ids - self.rotation_notified_agents
+                remaining = all_agent_ids - self.rotation_notified_agents
                 logging.info(f'Rotation sent to {agent_id}. Waiting for {len(remaining)} more agents: {remaining}')
             return
         
@@ -514,9 +530,13 @@ class Server:
         # In polling mode, store rotation message for delivery via next poll
         if self.is_polling:
             self.pending_rotation_msg = rot_msg
+            self.rotation_winner_id = winner  # Store winner ID
             self.rotation_notified_agents = set()  # Reset tracking
+            # Get all agents from DB to wait for everyone
+            all_db_agents = self.dbhandler.get_all_agents()
+            num_agents_to_notify = len(all_db_agents)
             logging.info(f'Rotation prepared for polling delivery. Winner: {winner} ({winner_ip}:{winner_sock}) score {winner_score}')
-            logging.info(f'Waiting for all {len(self.sm.agent_set)} agents to poll and receive rotation...')
+            logging.info(f'Waiting for all {num_agents_to_notify} agents in DB to poll and receive rotation...')
             # Exit will happen in _process_polling after all agents notified
             return
         else:
