@@ -132,8 +132,19 @@ class Client:
             break
 
         if resp is None:
-            logging.error('No response from aggregator after retries; participate() aborting')
-            return
+            logging.warning('No response from aggregator after retries')
+            logging.info('🔍 Checking if I should self-promote to aggregator...')
+            
+            # Check if aggr_ip is invalid/empty - indicates no aggregator exists
+            if not self.aggr_ip or self.aggr_ip in ['', '0.0.0.0', 'localhost', '127.0.0.1', 'CHANGE_ME']:
+                logging.info('⚡ No valid aggregator configured - self-promoting to aggregator!')
+                self._promote_to_aggregator()
+                logging.info('✅ Promotion complete - exiting to restart as aggregator')
+                os._exit(0)
+            else:
+                logging.error(f'Aggregator {self.aggr_ip}:{self.reg_socket} not reachable - cannot participate')
+                logging.error('participate() aborting')
+                return
 
         # Parse the response message (guard against unexpected format)
         try:
@@ -524,6 +535,42 @@ class Client:
         logging.info(f'--- Client State is now training ---')
 
         return global_models
+
+    def _promote_to_aggregator(self):
+        """
+        Promote this agent to aggregator role.
+        Updates config files to set role='aggregator' and correct IPs.
+        Called when no aggregator exists in the federation.
+        """
+        try:
+            # Determine device IP for this aggregator
+            device_ip = self.config.get('device_ip')
+            if not device_ip or device_ip == 'CHANGE_ME':
+                device_ip = self.agent_ip  # Fall back to detected IP
+            
+            logging.info(f'Promoting self to aggregator with IP: {device_ip}')
+            
+            # Update agent config: set role to aggregator
+            config_agent_file = set_config_file('agent')
+            cfg_agent = read_config(config_agent_file)
+            cfg_agent['role'] = 'aggregator'
+            cfg_agent['aggr_ip'] = device_ip
+            write_config(cfg_agent, config_agent_file)
+            logging.info(f'✏️  Updated {config_agent_file}: role=aggregator, aggr_ip={device_ip}')
+            
+            # Update aggregator config: set correct IP
+            config_aggr_file = set_config_file('aggregator')
+            cfg_aggr = read_config(config_aggr_file)
+            cfg_aggr['aggr_ip'] = device_ip
+            # Also update device_ip if not already set
+            if not cfg_aggr.get('device_ip') or cfg_aggr.get('device_ip') == 'CHANGE_ME':
+                cfg_aggr['device_ip'] = device_ip
+            write_config(cfg_aggr, config_aggr_file)
+            logging.info(f'✏️  Updated {config_aggr_file}: aggr_ip={device_ip}')
+            
+        except Exception as e:
+            logging.error(f'Failed to promote to aggregator: {e}')
+            raise
 
 
 if __name__ == "__main__":

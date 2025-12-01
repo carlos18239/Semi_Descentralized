@@ -42,6 +42,8 @@ import json
 with open('setups/config_agent.json', 'r') as f:
     cfg = json.load(f)
 cfg['role'] = 'agent'
+# Clear aggr_ip to force aggregator discovery/promotion
+cfg['aggr_ip'] = ''
 with open('setups/config_agent.json', 'w') as f:
     json.dump(cfg, f, indent=2)
 EOF
