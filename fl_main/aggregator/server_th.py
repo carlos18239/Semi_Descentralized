@@ -91,6 +91,12 @@ class Server:
         self.agent_wait_interval = int(self.config.get('agent_wait_interval', 10))
         # TTL (in seconds) to consider DB agent entries stale and eligible for cleanup
         self.agent_ttl_seconds = int(self.config.get('agent_ttl_seconds', 300))
+        # Rotation control: minimum rounds before allowing rotation
+        self.rotation_min_rounds = int(self.config.get('rotation_min_rounds', 2))
+        # Rotation control: rounds between rotations
+        self.rotation_interval = int(self.config.get('rotation_interval', 3))
+        # Last round when rotation occurred
+        self.last_rotation_round = 0
         # Pending rotation message (for polling mode)
         self.pending_rotation_msg = None
         # Track rotation winner ID
@@ -437,8 +443,18 @@ class Server:
 
                 # Push cluster model to DB
                 await self._push_cluster_models()
-                # Broadcast rotation and choose next aggregator
-                await self._choose_and_broadcast_new_aggregator()
+                
+                # Check if rotation should occur (only after min rounds and at intervals)
+                should_rotate = (
+                    self.sm.round >= self.rotation_min_rounds and
+                    (self.sm.round - self.last_rotation_round) >= self.rotation_interval
+                )
+                
+                if should_rotate:
+                    # Broadcast rotation and choose next aggregator
+                    await self._choose_and_broadcast_new_aggregator()
+                    self.last_rotation_round = self.sm.round
+                    logging.info(f"Rotation scheduled at round {self.sm.round}")
 
                 if self.is_polling == False:
                     await self._send_cluster_models_to_all()

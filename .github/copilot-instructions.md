@@ -52,7 +52,7 @@ Important files to reference when changing functionality
 Testing and debugging tips specific to this repo
 - When `communication_handler.send()` returns `None`, it means either there was no response or the connection failed — code frequently treats `None` as "no reply"; when debugging network issues, enable DEBUG logs and confirm socket/port values in `setups/config_*.json`.
 - To simulate multiple agents on one machine, run multiple `examples.minimal.minimal_MLEngine` with different `gm_recv_port` and `agent_name` arguments.
-- Rotation behavior: aggregator may `os._exit(0)` to yield the role; `role_supervisor.py` will restart appropriate process based on `role` in configs. Avoid in-place edits that assume the process remains running after rotation.
+- Rotation behavior: controlled by `rotation_min_rounds` (default 2) and `rotation_interval` (default 3) in `config_aggregator.json`. Aggregator waits until round >= `rotation_min_rounds`, then rotates every `rotation_interval` rounds. This ensures agents have time to train with aggregated models before rotation occurs. After rotation, all agents `os._exit(0)` and supervisors restart appropriate processes based on `role` field.
 - **Database errors**: "unable to open database file" means the `db_data_path` directory (default `./db`) doesn't exist. The aggregator now auto-creates it, but ensure you run from repo root where `setups/config_*.json` are visible.
 - **Log noise**: Background agent wait routine now uses `agent_wait_interval` (default 10s). `cleanup_old_agents` logs at INFO only when rows deleted; enable DEBUG to see periodic scans.
 - **Device configuration**: Use `setup_device_config.sh` to generate correct per-device configs. See `DEPLOYMENT.md` for detailed Raspberry Pi cluster setup.

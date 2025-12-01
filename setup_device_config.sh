@@ -44,7 +44,11 @@ EOF
   "round_interval": 5,
   "aggregation_threshold": 1,
   "polling": 1,
-  "role": "aggregator"
+  "role": "aggregator",
+  "rotation_min_rounds": 2,
+  "rotation_interval": 3,
+  "agent_wait_interval": 10,
+  "agent_ttl_seconds": 300
 }
 EOF
         echo "✓ r1 configurado con IP 172.23.198.229 y puerto 50002"
@@ -79,7 +83,11 @@ EOF
   "round_interval": 5,
   "aggregation_threshold": 1,
   "polling": 1,
-  "role": "aggregator"
+  "role": "aggregator",
+  "rotation_min_rounds": 2,
+  "rotation_interval": 3,
+  "agent_wait_interval": 10,
+  "agent_ttl_seconds": 300
 }
 EOF
         echo "✓ r2 configurado con IP 172.23.197.150 y puerto 8765"
@@ -114,7 +122,11 @@ EOF
   "round_interval": 5,
   "aggregation_threshold": 1,
   "polling": 1,
-  "role": "aggregator"
+  "role": "aggregator",
+  "rotation_min_rounds": 2,
+  "rotation_interval": 3,
+  "agent_wait_interval": 10,
+  "agent_ttl_seconds": 300
 }
 EOF
         echo "✓ r3 configurado con IP 172.23.198.244 y puerto 50003"
