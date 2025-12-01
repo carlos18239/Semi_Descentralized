@@ -4,6 +4,7 @@ This file gives focused, actionable guidance for AI coding agents working in thi
 
 High-level architecture
 - **Components**: three core runtime roles: `Agent` (`fl_main/agent`), `Aggregator` (`fl_main/aggregator`), and `PseudoDB` (`fl_main/pseudodb`).
+- **State management**: Aggregators are **stateless** - they maintain state only in memory (`agent_set`, `round`). The **PseudoDB is the only component that persists data** (models, agent registry, aggregator info). Each Raspberry Pi that becomes an aggregator operates independently without local DB files.
 - **Message layer**: communication is implemented over WebSockets using pickled Python lists (`fl_main/lib/util/communication_handler.py`). Message field positions are defined in `fl_main/lib/util/states.py` and created by helper functions in `fl_main/lib/util/messengers.py`.
 - **Data flow**: Agents send local models → Aggregator buffers them → Aggregator aggregates (FedAvg) → Aggregator pushes cluster model to PseudoDB and distributes to Agents. Rotation can promote an Agent to Aggregator.
 
@@ -41,7 +42,8 @@ Project-specific conventions & patterns
 
 Concurrency & networking notes
 - Servers are asyncio-based using `websockets`. Server entrypoints use `communication_handler.init_fl_server/init_db_server/init_client_server`.
-- Aggregator background tasks: `Server.model_synthesis_routine()` (periodic aggregation) and `_wait_for_agents_routine()` (attempts to connect agents saved in DB). Both are started as coroutines in `server_th.py`.
+- Aggregator background task: `Server.model_synthesis_routine()` (periodic aggregation). Agents register themselves via `register()` method.
+- **IMPORTANT**: Aggregators do NOT create local SQLite databases. All persistence is handled by the centralized PseudoDB server.
 - Client uses threads to run an asyncio client loop (`init_loop`) and a background server for receiving global models (`init_client_server`). Be careful when modifying threading/loop interactions.
 
 Important files to reference when changing functionality
@@ -57,7 +59,7 @@ Testing and debugging tips specific to this repo
   1. **Juez 1 (Early Stopping)**: Training terminates if global recall doesn't improve for `early_stopping_patience` rounds (default 120). Improvement threshold is `early_stopping_min_delta` (default 0.0001).
   2. **Juez 2 (Max Rounds)**: Training terminates if `max_rounds` is reached (default 100).
   Agents send recall metrics via `AgentMsgType.recall_upload` after each training round. Aggregator calculates global recall (average) and tracks improvement. When termination condition is met, aggregator sends `AggMsgType.termination` to all agents via polling, and all processes exit gracefully.
-- **Database errors**: "unable to open database file" means the `db_data_path` directory (default `./db`) doesn't exist. The aggregator now auto-creates it, but ensure you run from repo root where `setups/config_*.json` are visible.
+- **Database architecture**: The PseudoDB server (`fl_main/pseudodb/pseudo_db.py`) is the ONLY component that creates and manages the SQLite database. Aggregators are stateless and do NOT create local DB files - they maintain all state in memory (`agent_set`, `round`) and only push models to PseudoDB for persistence. This ensures each Raspberry Pi that becomes an aggregator doesn't create its own conflicting database.
 - **Log noise**: Background agent wait routine now uses `agent_wait_interval` (default 10s). `cleanup_old_agents` logs at INFO only when rows deleted; enable DEBUG to see periodic scans.
 - **Device configuration**: Use `setup_device_config.sh` to generate correct per-device configs. See `DEPLOYMENT.md` for detailed Raspberry Pi cluster setup.
 

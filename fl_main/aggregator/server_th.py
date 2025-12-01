@@ -11,7 +11,7 @@ from fl_main.lib.util.messengers import generate_rotation_message, generate_db_p
 from fl_main.lib.util.states import ParticipateMSGLocation, RotationMSGLocation, ModelUpMSGLocation, PollingMSGLocation, \
      ModelType, AgentMsgType
 from fl_main.lib.util.metrics_logger import AggregatorMetricsLogger
-from fl_main.pseudodb.sqlite_db import SQLiteDBHandler
+# Removed SQLiteDBHandler - aggregator uses in-memory state only, PseudoDB handles persistence
 from .state_manager import StateManager
 from .aggregation import Aggregator
 
@@ -34,29 +34,8 @@ class Server:
         self.sm = StateManager()
         self.agg = Aggregator(self.sm)  # aggregation functions
 
-        # Config de la DB (la misma que usa PseudoDB)
-        db_config_file = set_config_file("db")
-        db_config = read_config(db_config_file)
-
-        db_data_path = db_config['db_data_path']
-        db_name = db_config['db_name']
-        
-        # Create DB directory if it doesn't exist
-        if not os.path.exists(db_data_path):
-            os.makedirs(db_data_path)
-        
-        # Create models directory if specified
-        db_model_path = db_config.get('db_model_path')
-        if db_model_path and not os.path.exists(db_model_path):
-            os.makedirs(db_model_path)
-        
-        self.db_file = f'{db_data_path}/{db_name}.db'   # ./db/sample_data.db
-        self.dbhandler = SQLiteDBHandler(self.db_file)
-        try:
-            # Ensure DB schema exists (idempotent)
-            self.dbhandler.initialize_DB()
-        except Exception as e:
-            logging.warning(f"No se pudo inicializar DB desde Server (se intentará usar fichero existente): {e}")
+        # Aggregator uses in-memory state only
+        # All persistence (models, agent registry) handled by centralized PseudoDB
 
         # Set up FL server's advertised IP address
         # Prefer device_ip if set, otherwise use aggr_ip, fallback to detected host IP
@@ -133,98 +112,10 @@ class Server:
         self.round_models_received = 0
         self.aggregation_start_time = None
         
-        self._init_round_from_db()
-        # Load agent entries from DB into a pending list. Actual connection
-        # and adding to StateManager happens in a background coroutine
-        # that waits for agents to become reachable.
-        self._load_agents_from_db()
-        self.db_agents = []
-        
-        # Register this aggregator in DB so agents can discover it
-        try:
-            self.dbhandler.update_current_aggregator(self.sm.id, self.aggr_ip, self.reg_socket)
-            logging.info(f"✅ Aggregator registered in DB: {self.aggr_ip}:{self.reg_socket}")
-        except Exception as e:
-            logging.error(f"Failed to register aggregator in DB: {e}")
-
-    def _init_round_from_db(self):
-        try:
-            max_round = self.dbhandler.get_max_round(ModelType.cluster)
-        except Exception as e:
-            logging.error(f"No se pudo leer MAX(round) desde DB, inicio en 0. Error: {e}")
-            self.sm.round = 0
-            return
-
-        self.sm.round = max_round
-        logging.info(f"Round inicial cargado desde DB: {self.sm.round}")
-
-    def _load_agents_from_db(self):
-        """
-        Carga agentes desde la tabla 'agents' y los guarda en `self.db_agents`.
-        No se añaden todavía a `StateManager` para evitar asumir que están
-        conectados; una rutina en background intentará conectar y añadirlos
-        cuando estén disponibles.
-        """
-        try:
-            rows = self.dbhandler.get_all_agents()
-        except Exception as e:
-            logging.error(f"No se pudieron cargar agentes desde DB: {e}")
-            return
-        if not rows:
-            logging.info("No hay agentes registrados en la tabla 'agents'.")
-            self.db_agents = []
-            return
-
-        # Store rows to be processed by the background waiter
-        self.db_agents = rows
-        logging.info(f"Agentes cargados desde DB en memoria (pendientes): {self.db_agents}")
-
-    async def _wait_for_agents_routine(self):
-        """
-        Rutina en background que intenta conectar periódicamente con los
-        agentes almacenados en DB. Cuando un agente responde, se añade al
-        `StateManager` y se actualiza su `last_seen` en la DB.
-        """
-        logging.info("Iniciando rutina de espera de agentes desde DB...")
-        while True:
-            # Cleanup stale agents in DB before attempting connections
-            try:
-                self.dbhandler.cleanup_old_agents(self.agent_ttl_seconds)
-            except Exception as e:
-                logging.debug(f"Error ejecutando cleanup_old_agents: {e}")
-            # Reload DB list in case new agents were added by registraciones
-            try:
-                rows = self.dbhandler.get_all_agents()
-            except Exception as e:
-                logging.error(f"Error leyendo agentes desde DB en waiter: {e}")
-                rows = []
-
-            for agent_id, ip, socket in rows:
-                # Skip if already in StateManager
-                if any(a.get('agent_id') == agent_id for a in self.sm.agent_set):
-                    continue
-
-                wsaddr = f'ws://{ip}:{socket}'
-                try:
-                    # Try to open a short-lived connection to check reachability
-                    async with websockets.connect(wsaddr, ping_interval=None) as websocket:
-                        logging.info(f'Agente {agent_id} reachable at {ip}:{socket}')
-                        # Add to StateManager
-                        try:
-                            self.sm.add_agent(agent_id, agent_id, ip, socket)
-                        except Exception as e:
-                            logging.error(f"Error añadiendo agente {agent_id} a StateManager: {e}")
-
-                        # Update DB (upsert) to refresh last_seen
-                        try:
-                            self.dbhandler.upsert_agent(agent_id, ip, int(socket))
-                        except Exception as e:
-                            logging.error(f"Error actualizando agente {agent_id} en DB: {e}")
-                except Exception:
-                    logging.debug(f'Agente {agent_id} no disponible aún en {ip}:{socket}')
-
-            # Sleep some time before next poll; keep light frequency
-            await asyncio.sleep(self.agent_wait_interval)
+        # Aggregator starts fresh at round 0
+        # Agents register themselves on startup
+        self.sm.round = 0
+        logging.info(f"Aggregator initialized at round {self.sm.round}")
     
     async def register(self, websocket: str, path):
         """
@@ -251,14 +142,7 @@ class Server:
         logging.info(f"register(): participation message from agent_name={agent_name}, agent_id={agent_id}, addr={addr}, exch_socket={es}")
 
         uid, ues = self.sm.add_agent(agent_name, agent_id, addr, es)
-        try:
-            ok = self.dbhandler.upsert_agent(agent_id, addr, int(es))
-            if ok:
-                logging.info(f"register(): agent {agent_id} saved/updated in DB (ip={addr}, socket={es})")
-            else:
-                logging.warning(f"register(): upsert_agent returned False for {agent_id} (ip={addr}, socket={es})")
-        except Exception as e:
-            logging.error(f"No se pudo guardar/actualizar agente {agent_id} en DB: {e}")
+        logging.info(f"register(): agent {agent_id} added to memory (ip={addr}, socket={es})")
 
         # If the weights in the first models should be used as the init models
         # The very first agent connecting to the aggregator decides the shape of the models
@@ -494,13 +378,12 @@ class Server:
         
         # Priority 1: Check for pending rotation message
         if self.pending_rotation_msg is not None:
-            # Get all agents from DB
-            all_db_agents = self.dbhandler.get_all_agents()
-            all_agent_ids = {aid for (aid, ip, sock) in all_db_agents}
+            # Use in-memory agent set (no DB needed)
+            all_agent_ids = {a['agent_id'] for a in self.sm.agent_set}
             
-            # Safety check: if no agents in DB, cancel rotation
+            # Safety check: if no agents in memory, cancel rotation
             if len(all_agent_ids) == 0:
-                logging.warning("No agents in DB during rotation - cancelling rotation")
+                logging.warning("No agents in memory during rotation - cancelling rotation")
                 self.pending_rotation_msg = None
                 self.rotation_notified_agents = set()
                 return
@@ -595,42 +478,8 @@ class Server:
             # Periodic check (frequency is specified in the JSON config file)
             await asyncio.sleep(self.round_interval)
             
-            # --- ROBUST RECONNECTION: Sync agent_set with DB before aggregation ---
-            # IMPORTANT: Only sync FROM DB to memory, never clear memory if DB is empty
-            # This prevents race condition where cleanup_old_agents runs before agents re-register
-            try:
-                db_agents = self.dbhandler.get_all_agents()
-                if db_agents and len(db_agents) > 0:
-                    # Rebuild agent_set from DB (authoritative source)
-                    synced_agent_set = []
-                    for agent_id, agent_ip, agent_socket in db_agents:
-                        # Try to match with existing agent in agent_set to preserve agent_name
-                        agent_name = None
-                        for existing_agent in self.sm.agent_set:
-                            if existing_agent['agent_id'] == agent_id:
-                                agent_name = existing_agent['agent_name']
-                                break
-                        if not agent_name:
-                            agent_name = f"agent_{agent_id[:8]}"
-                        
-                        synced_agent_set.append({
-                            'agent_name': agent_name,
-                            'agent_id': agent_id,
-                            'agent_ip': agent_ip,
-                            'socket': agent_socket
-                        })
-                    
-                    if len(synced_agent_set) != len(self.sm.agent_set):
-                        logging.info(f"🔄 Agent_set synced with DB: {len(self.sm.agent_set)} -> {len(synced_agent_set)} agents")
-                    self.sm.agent_set = synced_agent_set
-                elif len(self.sm.agent_set) == 0:
-                    # Both DB and memory are empty - this is normal at startup
-                    logging.debug("Waiting for agents to connect...")
-                else:
-                    # DB is empty but memory has agents - keep memory, they might be registering
-                    logging.debug(f"DB empty but agent_set has {len(self.sm.agent_set)} agents - keeping memory")
-            except Exception as e:
-                logging.error(f"Failed to sync agent_set with DB: {e}")
+            # Agent registration happens via register() method
+            # No need to sync with DB - agents in memory are authoritative
 
             # Check if we're waiting for models and track timeout
             if not self.sm.ready_for_local_aggregation():
@@ -770,11 +619,8 @@ class Server:
         # Collect candidate agents (connected)
         agents = list(self.sm.agent_set)
         if not agents:
-            rows = self.dbhandler.get_all_agents()
-            if not rows:
-                logging.info("No agents available for rotation.")
-                return
-            agents = [{'agent_id': aid, 'agent_ip': ip, 'socket': int(sock)} for (aid, ip, sock) in rows]
+            logging.info("No agents available for rotation.")
+            return
 
         # Generate random scores (including self)
         scores = {a['agent_id']: random.randint(1, 10) for a in agents}
@@ -801,21 +647,13 @@ class Server:
         models = convert_LDict_to_Dict(self.sm.cluster_models)
         rot_msg = generate_rotation_message(winner, winner_ip, winner_sock, model_id, self.sm.round, models, scores)
         
-        # Register new aggregator in DB for agent discovery
-        try:
-            self.dbhandler.update_current_aggregator(winner, winner_ip, winner_sock)
-            logging.info(f"✅ Updated DB with new aggregator: {winner_ip}:{winner_sock}")
-        except Exception as e:
-            logging.error(f"Failed to update aggregator in DB: {e}")
-
         # In polling mode, store rotation message for delivery via next poll
         if self.is_polling:
             self.pending_rotation_msg = rot_msg
             self.rotation_winner_id = winner  # Store winner ID
             self.rotation_notified_agents = set()  # Reset tracking
-            # Get all agents from DB to wait for everyone
-            all_db_agents = self.dbhandler.get_all_agents()
-            num_agents_to_notify = len(all_db_agents)
+            # Use in-memory agent count
+            num_agents_to_notify = len(self.sm.agent_set)
             logging.info(f'🎯 Rotation prepared for polling delivery. Winner: {winner} ({winner_ip}:{winner_sock}) score {winner_score}')
             logging.info(f'📋 Will wait for all {num_agents_to_notify} agents to poll and receive rotation message...')
             # Exit will happen in _process_polling after all agents notified
@@ -903,12 +741,11 @@ if __name__ == "__main__":
     s = Server()
     logging.info("--- Aggregator Started ---")
 
-    # Start FL server and background routines (model synthesis + agent waiter)
+    # Start FL server and background routine (model synthesis only)
     # Bind to 0.0.0.0 inside container for reachability, but keep
     # `s.aggr_ip` as the advertised address used in messages.
     bind_ip = '0.0.0.0'
     init_fl_server(s.register,
                    s.receive_msg_from_agent,
                    s.model_synthesis_routine(),
-                   bind_ip, s.reg_socket, s.recv_socket,
-                   s._wait_for_agents_routine())
+                   bind_ip, s.reg_socket, s.recv_socket)
