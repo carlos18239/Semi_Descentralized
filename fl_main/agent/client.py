@@ -50,6 +50,10 @@ class Client:
         self.reg_socket = self.config['reg_socket']
         self.msend_socket = 0  # later updated based on welcome message
         self.exch_socket = 0 
+        
+        # Log the aggregator IP for debugging
+        logging.info(f"📡 Configured aggregator IP: '{self.aggr_ip}'")
+        logging.info(f"🔌 Configured registration socket: {self.reg_socket}")
 
         if self.simulation_flag:
             # if it's simulation, use the manual socket number and agent name
@@ -134,9 +138,19 @@ class Client:
         if resp is None:
             logging.warning('No response from aggregator after retries')
             logging.info('🔍 Checking if I should self-promote to aggregator...')
+            logging.info(f'   Current aggr_ip value: "{self.aggr_ip}" (type: {type(self.aggr_ip).__name__})')
+            logging.info(f'   Is empty? {not self.aggr_ip}')
+            logging.info(f'   In invalid list? {self.aggr_ip in ["", "0.0.0.0", "localhost", "127.0.0.1", "CHANGE_ME"]}')
             
             # Check if aggr_ip is invalid/empty - indicates no aggregator exists
-            if not self.aggr_ip or self.aggr_ip in ['', '0.0.0.0', 'localhost', '127.0.0.1', 'CHANGE_ME']:
+            # Must check for empty string explicitly since '' is falsy
+            should_promote = (
+                not self.aggr_ip or 
+                self.aggr_ip.strip() == '' or
+                self.aggr_ip in ['0.0.0.0', 'localhost', '127.0.0.1', 'CHANGE_ME']
+            )
+            
+            if should_promote:
                 logging.info('⚡ No valid aggregator configured - self-promoting to aggregator!')
                 self._promote_to_aggregator()
                 logging.info('✅ Promotion complete - exiting to restart as aggregator')
