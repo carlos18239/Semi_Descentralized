@@ -44,6 +44,12 @@ class Client:
         # Read config
         config_file = set_config_file("agent")
         self.config = read_config(config_file)
+        
+        # Read DB config for discovery/election
+        db_config_file = set_config_file("db")
+        self.db_config = read_config(db_config_file)
+        self.db_ip = self.db_config['db_ip']
+        self.db_socket = self.db_config['db_socket']
 
         # Comm. info to join the FL platform
         self.aggr_ip = self.config['aggr_ip']
@@ -54,6 +60,7 @@ class Client:
         # Log the aggregator IP for debugging
         logging.info(f"📡 Configured aggregator IP: '{self.aggr_ip}'")
         logging.info(f"🔌 Configured registration socket: {self.reg_socket}")
+        logging.info(f"🗄️  Database server: {self.db_ip}:{self.db_socket}")
 
         if self.simulation_flag:
             # if it's simulation, use the manual socket number and agent name
@@ -106,9 +113,50 @@ class Client:
     async def participate(self):
         """
         Send the first message to join an aggregator and
-        Receive state/comm. info from the aggregator
+        Receive state/comm. info from the aggregator.
+        
+        NEW PROTOCOL:
+        1. Register in DB with random score (1-100)
+        2. Query DB for existing aggregator
+        3. If no aggregator exists, trigger election via DB
+        4. Connect to the elected aggregator
         :return:
         """
+        # Step 1: Register in DB
+        my_id, my_score = await self._register_in_db()
+        await asyncio.sleep(2)  # Give other agents time to register
+        
+        # Step 2: Discover aggregator from DB
+        agg_ip, agg_socket = await self._discover_aggregator_from_db()
+        
+        # Step 3: If no aggregator, trigger election
+        if not agg_ip:
+            logging.info('⚡ No aggregator exists - triggering election...')
+            # For initial election, we assume all registered agents participate
+            # In a real system, agents would coordinate via DB or timeout
+            scores = {my_id: my_score}  # Simplified: only my score
+            election_result = await self._elect_aggregator_via_db(scores)
+            
+            if election_result:
+                winner_id, winner_ip, winner_socket, winner_score = election_result
+                if winner_id == my_id:
+                    logging.info(f'🏆 I won the election! Promoting to aggregator...')
+                    self._promote_to_aggregator()
+                    os._exit(0)  # Exit to restart as aggregator
+                else:
+                    logging.info(f'📊 Election winner: {winner_ip}:{winner_socket} (not me)')
+                    agg_ip, agg_socket = winner_ip, winner_socket
+                    # Wait for winner to start aggregator
+                    await asyncio.sleep(5)
+            else:
+                logging.error('❌ Election failed - cannot proceed')
+                return
+        
+        # Update connection info
+        self.aggr_ip = agg_ip
+        self.reg_socket = int(agg_socket)
+        
+        # Step 4: Connect to aggregator (existing logic)
         # Read the local models to tell the structure to the aggregator
         # (not necessarily trained)
         data_dict, performance_dict = load_model_file(self.model_path, self.lmfile)
@@ -606,6 +654,72 @@ class Client:
         except Exception as e:
             logging.error(f'Failed to promote to aggregator: {e}')
             raise
+
+    async def _register_in_db(self):
+        """
+        Register this agent in the centralized DB with a random score for election.
+        Returns: (agent_id, score)
+        """
+        import random
+        score = random.randint(1, 100)
+        device_ip = self.config.get('device_ip', self.agent_ip)
+        if device_ip == 'CHANGE_ME':
+            device_ip = self.agent_ip
+        
+        socket = self.config.get('reg_socket', 8765)
+        
+        # Message format: [msg_type, agent_id, ip, socket, score]
+        from fl_main.lib.util.states import DBMsgType
+        msg = [DBMsgType.register_agent.value, self.id, device_ip, int(socket), score]
+        
+        logging.info(f'🎲 Registering in DB: {device_ip}:{socket} (score: {score})')
+        resp = await send(msg, self.db_ip, self.db_socket)
+        
+        if resp and resp[0] == 'registered':
+            logging.info(f'✅ Registered in DB successfully')
+            return self.id, score
+        else:
+            logging.warning(f'⚠️  DB registration response: {resp}')
+            return self.id, score
+
+    async def _discover_aggregator_from_db(self):
+        """
+        Query DB for current aggregator.
+        Returns: (aggregator_ip, aggregator_socket) or (None, None) if no aggregator
+        """
+        from fl_main.lib.util.states import DBMsgType
+        msg = [DBMsgType.get_aggregator.value]
+        
+        logging.info(f'🔍 Querying DB for current aggregator...')
+        resp = await send(msg, self.db_ip, self.db_socket)
+        
+        if resp and resp[0] == 'aggregator':
+            agg_id, agg_ip, agg_socket = resp[1], resp[2], resp[3]
+            logging.info(f'📡 Found aggregator in DB: {agg_ip}:{agg_socket}')
+            return agg_ip, agg_socket
+        else:
+            logging.info(f'ℹ️  No aggregator found in DB yet')
+            return None, None
+
+    async def _elect_aggregator_via_db(self, all_scores):
+        """
+        Send election request to DB with all agent scores.
+        DB will determine winner and update current_aggregator table.
+        Returns: (winner_id, winner_ip, winner_socket, winner_score) or None
+        """
+        from fl_main.lib.util.states import DBMsgType
+        msg = [DBMsgType.elect_aggregator.value, all_scores]
+        
+        logging.info(f'🗳️  Requesting aggregator election via DB ({len(all_scores)} candidates)...')
+        resp = await send(msg, self.db_ip, self.db_socket)
+        
+        if resp and resp[0] == 'elected':
+            winner_id, winner_ip, winner_socket, winner_score = resp[1], resp[2], resp[3], resp[4]
+            logging.info(f'🏆 Election result: {winner_ip}:{winner_socket} (score: {winner_score})')
+            return winner_id, winner_ip, winner_socket, winner_score
+        else:
+            logging.error(f'❌ Election failed: {resp}')
+            return None
 
 
 if __name__ == "__main__":

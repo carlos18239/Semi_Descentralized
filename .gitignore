@@ -2,6 +2,10 @@
 data/
 db/
 
+# Device-specific configuration (do not commit)
+setups/config_agent.json
+setups/config_aggregator.json
+
 # Opcional: ignorar archivos temporales o generados
 *.pyc
 __pycache__/

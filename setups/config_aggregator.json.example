@@ -1,0 +1,22 @@
+{
+  "device_ip": "CHANGE_ME",
+  "aggr_ip": "172.23.197.150",
+  "db_ip": "172.23.211.109",
+  "reg_socket": "8765",
+  "exch_socket": "7890",
+  "recv_socket": "4321",
+  "db_socket": "9017",
+  "round_interval": 5,
+  "aggregation_threshold": 1,
+  "polling": 1,
+  "role": "aggregator",
+  "rotation_min_rounds": 1,
+  "rotation_interval": 3,
+  "rotation_delay": 20,
+  "agent_wait_interval": 10,
+  "agent_ttl_seconds": 600,
+  "aggregation_timeout": 120,
+  "max_rounds": 100,
+  "early_stopping_patience": 120,
+  "early_stopping_min_delta": 0.0001
+}

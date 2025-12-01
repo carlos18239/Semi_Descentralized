@@ -48,30 +48,80 @@ class PseudoDB:
 
     async def handler(self, websocket, path):
         """
-        Receives all requests from aggregators and returns requested info
+        Receives all requests from agents/aggregators and returns requested info
         :param websocket:
         :param path:
         :return:
         """
-        # receive a request from an aggregator
+        # receive a request
         msg = await receive(websocket)
 
         logging.info(f'Request Arrived')
         logging.debug(f'Request: {msg}')
 
         # Extract the message type
-        msg_type = msg[int(DBPushMsgLocation.msg_type)]
+        msg_type = msg[0] if isinstance(msg, list) and len(msg) > 0 else None
 
-        reply = list()
-        if msg_type == DBMsgType.push: # models
+        reply = []
+        
+        if msg_type == DBMsgType.push.value:  # models
             logging.info(f'--- Model pushed: {msg[int(DBPushMsgLocation.model_type)]} ---')
             self._push_all_data_to_db(msg)
             reply.append('confirmation')
+            
+        elif msg_type == DBMsgType.register_agent.value:  # register agent
+            # msg format: [msg_type, agent_id, ip, socket, score]
+            agent_id, ip, socket, score = msg[1], msg[2], msg[3], msg[4]
+            logging.info(f'--- Agent registration: {agent_id} at {ip}:{socket} (score: {score}) ---')
+            self.dbhandler.upsert_agent(agent_id, ip, socket)
+            # Store score temporarily for election (could use a separate table)
+            reply.append('registered')
+            
+        elif msg_type == DBMsgType.get_aggregator.value:  # get current aggregator
+            logging.info(f'--- Get current aggregator request ---')
+            result = self.dbhandler.get_current_aggregator()
+            if result:
+                agg_id, agg_ip, agg_socket = result
+                reply = ['aggregator', agg_id, agg_ip, agg_socket]
+                logging.info(f'   Current aggregator: {agg_ip}:{agg_socket}')
+            else:
+                reply = ['no_aggregator']
+                logging.info(f'   No aggregator registered yet')
+                
+        elif msg_type == DBMsgType.elect_aggregator.value:  # elect new aggregator
+            # msg format: [msg_type, {agent_id: score, ...}]
+            scores = msg[1] if len(msg) > 1 else {}
+            logging.info(f'--- Aggregator election request with {len(scores)} candidates ---')
+            
+            if scores:
+                # Find winner (highest score, tie-break by agent_id)
+                winner_id = max(scores.items(), key=lambda x: (x[1], x[0]))[0]
+                logging.info(f'   Winner: {winner_id} (score: {scores[winner_id]})')
+                
+                # Get winner's IP/socket from agents table
+                all_agents = self.dbhandler.get_all_agents()
+                winner_ip, winner_socket = None, None
+                for aid, ip, sock in all_agents:
+                    if aid == winner_id:
+                        winner_ip, winner_socket = ip, sock
+                        break
+                
+                if winner_ip:
+                    self.dbhandler.update_current_aggregator(winner_id, winner_ip, winner_socket)
+                    reply = ['elected', winner_id, winner_ip, winner_socket, scores[winner_id]]
+                    logging.info(f'   Aggregator elected: {winner_ip}:{winner_socket}')
+                else:
+                    reply = ['election_failed', 'winner_not_found']
+                    logging.error(f'   Election failed: winner not in agents table')
+            else:
+                reply = ['election_failed', 'no_candidates']
+                logging.warning(f'   Election failed: no candidates provided')
         else:
             # Error for undefined message type
-            raise TypeError(f'Undefined DB Access Message Type: {msg_type}.')
+            logging.error(f'Undefined DB Access Message Type: {msg_type}')
+            reply = ['error', f'unknown_msg_type_{msg_type}']
 
-        # reply to the aggregator
+        # reply to the sender
         await send_websocket(reply, websocket)
 
 

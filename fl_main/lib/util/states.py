@@ -28,6 +28,9 @@ class DBMsgType(Enum):
     Message types defined in the communication protocol between an aggregator and a database
     """
     push = 0
+    register_agent = 1
+    get_aggregator = 2
+    elect_aggregator = 3
 
 class AgentMsgType(Enum):
     """

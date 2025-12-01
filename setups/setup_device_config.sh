@@ -20,7 +20,7 @@ case $DEVICE in
         cat > "$SETUPS_DIR/config_agent.json" << 'EOF'
 {
   "device_ip": "172.23.211.138",
-  "aggr_ip": "172.23.211.117",
+  "aggr_ip": "",
   "reg_socket": "8765",
   "model_path": "./data/agents",
   "local_model_file_name": "lms.binaryfile",
