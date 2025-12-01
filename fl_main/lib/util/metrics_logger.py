@@ -117,9 +117,11 @@ class MetricsLogger:
             writer.writerow(row)
         
         # Log to console
+        ga_str = f"{global_accuracy:.4f}" if global_accuracy is not None else "N/A"
+        la_str = f"{local_accuracy:.4f}" if local_accuracy is not None else "N/A"
         logging.info(f"📊 Metrics Round {round_num}: "
-                    f"GA={global_accuracy:.4f if global_accuracy else 0:.4f}, "
-                    f"LA={local_accuracy:.4f if local_accuracy else 0:.4f}, "
+                    f"GA={ga_str}, "
+                    f"LA={la_str}, "
                     f"Msgs={num_messages}, "
                     f"Bytes={bytes_round_total}, "
                     f"Time={round_time:.2f}s")
@@ -219,9 +221,10 @@ class AggregatorMetricsLogger:
             writer = csv.DictWriter(f, fieldnames=self.headers)
             writer.writerow(row)
         
+        recall_str = f"{global_recall:.4f}" if global_recall is not None else "N/A"
         logging.info(f"📊 Aggregator Metrics Round {round_num}: "
                     f"Agents={num_agents}, "
-                    f"Recall={global_recall:.4f if global_recall else 0:.4f}, "
+                    f"Recall={recall_str}, "
                     f"Models={self.cumulative_models}")
     
     def get_csv_path(self):
