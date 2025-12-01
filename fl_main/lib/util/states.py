@@ -36,6 +36,7 @@ class AgentMsgType(Enum):
     participate = 0
     update = 1
     polling = 2
+    recall_upload = 3
 
 class AggMsgType(Enum):
     """
@@ -45,6 +46,7 @@ class AggMsgType(Enum):
     update = 1
     ack = 2
     rotation = 3
+    termination = 4
     
 class RotationMSGLocation(IntEnum):
     msg_type = 0
@@ -130,3 +132,21 @@ class PollingMSGLocation(IntEnum):
     msg_type = 0
     round = 1
     agent_id = 2
+
+class RecallUpMSGLocation(IntEnum):
+    """
+    index indicator to recall upload message from agent
+    """
+    msg_type = 0
+    recall_value = 1
+    round = 2
+    agent_id = 3
+
+class TerminationMsgLocation(IntEnum):
+    """
+    index indicator to termination message from aggregator
+    """
+    msg_type = 0
+    reason = 1
+    final_round = 2
+    final_recall = 3

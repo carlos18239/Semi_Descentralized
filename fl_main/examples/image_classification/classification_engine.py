@@ -158,4 +158,10 @@ if __name__ == '__main__':
 
         # Local Model evaluation (id, accuracy)
         accuracy = compute_performance(models, prep_test_data(), True)
+        
+        # Send trained model with metadata
         fl_client.send_trained_model(models, int(TrainingMetaData.num_training_data), accuracy)
+        
+        # Send recall metric to aggregator for early stopping judge
+        # Using accuracy as recall (you can change to actual recall if needed)
+        fl_client.send_recall_metric(accuracy)

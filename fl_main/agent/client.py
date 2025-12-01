@@ -278,8 +278,24 @@ class Client:
         try:
             msg_type = resp[int(0)]
             
-            # Check for rotation message first
-            if msg_type == AggMsgType.rotation:
+            # Priority 0: Check for termination message (highest priority)
+            if msg_type == AggMsgType.termination:
+                from fl_main.lib.util.states import TerminationMsgLocation
+                reason = resp[int(TerminationMsgLocation.reason)]
+                final_round = resp[int(TerminationMsgLocation.final_round)]
+                final_recall = resp[int(TerminationMsgLocation.final_recall)]
+                
+                logging.warning(f'🛑 TRAINING TERMINATED by aggregator')
+                logging.info(f'Reason: {reason}')
+                logging.info(f'Final round: {final_round}')
+                logging.info(f'Final global recall: {final_recall:.4f}')
+                
+                # Exit gracefully
+                logging.info('Agent exiting due to training termination...')
+                os._exit(0)
+            
+            # Priority 1: Check for rotation message
+            elif msg_type == AggMsgType.rotation:
                 winner = resp[int(RotationMSGLocation.new_aggregator_id)]
                 winner_ip = resp[int(RotationMSGLocation.new_aggregator_ip)]
                 winner_sock = resp[int(RotationMSGLocation.new_aggregator_reg_socket)]
@@ -448,6 +464,29 @@ class Client:
         else:  # Keep the training results
             # Send models
             self.setup_sending_models(models, num_samples, perf_value)
+
+    def send_recall_metric(self, recall_value):
+        """
+        Send recall metric to aggregator for early stopping judge
+        :param recall_value: float - recall/accuracy metric for this round
+        """
+        from fl_main.lib.util.messengers import generate_recall_up
+        from fl_main.lib.util.communication_handler import send
+        
+        recall_msg = generate_recall_up(recall_value, self.round, self.id)
+        
+        # Send recall message to aggregator
+        try:
+            aggr_ip = self.config['aggr_ip']
+            reg_socket = self.config['reg_socket']
+            
+            resp = send(recall_msg, aggr_ip, int(reg_socket))
+            if resp:
+                logging.info(f'--- Recall metric ({recall_value:.4f}) sent to aggregator ---')
+            else:
+                logging.warning(f'--- Failed to send recall metric ---')
+        except Exception as e:
+            logging.error(f'Error sending recall metric: {e}')
 
     def setup_sending_models(self, models, num_samples, perf_val):
         """

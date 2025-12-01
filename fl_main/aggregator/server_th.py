@@ -103,6 +103,19 @@ class Server:
         self.rotation_winner_id = None
         # Track which agents have received rotation (set of agent_ids)
         self.rotation_notified_agents = set()
+        
+        # Termination judges
+        self.max_rounds = int(self.config.get('max_rounds', 100))
+        self.early_stopping_patience = int(self.config.get('early_stopping_patience', 120))
+        self.early_stopping_min_delta = float(self.config.get('early_stopping_min_delta', 0.0001))
+        self.best_global_recall = 0.0
+        self.rounds_without_improvement = 0
+        self.current_round_recalls = {}  # agent_id -> recall_value
+        self.global_recall_history = []  # history of global recalls
+        self.training_terminated = False
+        self.termination_reason = None
+        self.pending_termination_msg = None
+        
         self._init_round_from_db()
         # Load agent entries from DB into a pending list. Actual connection
         # and adding to StateManager happens in a background coroutine
@@ -310,6 +323,9 @@ class Server:
 
         elif msg[int(PollingMSGLocation.msg_type)] == AgentMsgType.polling:
             await self._process_polling(msg, websocket)
+            
+        elif msg[0] == AgentMsgType.recall_upload:
+            await self._process_recall_upload(msg)
 
     async def _process_lmodel_upload(self, msg):
         """
@@ -340,6 +356,86 @@ class Server:
         except Exception as e:
             logging.error(f"Error buffering local models from {agent_id}: {e}")
 
+    async def _process_recall_upload(self, msg):
+        """
+        Process recall metric uploaded from agents (Juez 1: Early Stopping)
+        :param msg: [AgentMsgType.recall_upload, recall_value, round, agent_id]
+        """
+        from fl_main.lib.util.states import RecallUpMSGLocation
+        
+        recall_value = float(msg[int(RecallUpMSGLocation.recall_value)])
+        round_no = int(msg[int(RecallUpMSGLocation.round)])
+        agent_id = msg[int(RecallUpMSGLocation.agent_id)]
+        
+        logging.info(f'--- Recall Upload Received: agent={agent_id}, recall={recall_value:.4f}, round={round_no} ---')
+        
+        # Store recall for this agent in current round
+        self.current_round_recalls[agent_id] = recall_value
+        
+        # Check if we have received recalls from ALL registered agents
+        num_agents = len(self.sm.agent_set)
+        if len(self.current_round_recalls) >= num_agents and num_agents > 0:
+            # Calculate global recall (average)
+            global_recall = sum(self.current_round_recalls.values()) / len(self.current_round_recalls)
+            self.global_recall_history.append(global_recall)
+            
+            logging.info(f'=== GLOBAL RECALL (Round {self.sm.round}): {global_recall:.4f} ===')
+            logging.info(f'Individual recalls: {self.current_round_recalls}')
+            
+            # Check for improvement
+            if global_recall > self.best_global_recall + self.early_stopping_min_delta:
+                improvement = global_recall - self.best_global_recall
+                logging.info(f'✓ Global recall improved by {improvement:.4f} (new best: {global_recall:.4f})')
+                self.best_global_recall = global_recall
+                self.rounds_without_improvement = 0
+            else:
+                self.rounds_without_improvement += 1
+                logging.info(f'✗ No improvement for {self.rounds_without_improvement} rounds (best: {self.best_global_recall:.4f})')
+            
+            # Reset current round recalls for next round
+            self.current_round_recalls = {}
+            
+            # Check termination conditions
+            self._check_termination_judges()
+
+    def _check_termination_judges(self):
+        """
+        Check both termination judges:
+        Juez 1: Early stopping (no improvement for `early_stopping_patience` rounds)
+        Juez 2: Maximum rounds limit
+        """
+        if self.training_terminated:
+            return
+        
+        # Juez 2: Maximum rounds
+        if self.sm.round >= self.max_rounds:
+            self.training_terminated = True
+            self.termination_reason = f"max_rounds_reached"
+            from fl_main.lib.util.messengers import generate_termination_msg
+            self.pending_termination_msg = generate_termination_msg(
+                reason=f"Reached maximum rounds limit ({self.max_rounds})",
+                final_round=self.sm.round,
+                final_recall=self.best_global_recall
+            )
+            logging.warning(f'🛑 TRAINING TERMINATED: Reached max rounds ({self.max_rounds})')
+            logging.info(f'Final global recall: {self.best_global_recall:.4f}')
+            return
+        
+        # Juez 1: Early stopping
+        if self.rounds_without_improvement >= self.early_stopping_patience:
+            self.training_terminated = True
+            self.termination_reason = f"early_stopping"
+            from fl_main.lib.util.messengers import generate_termination_msg
+            self.pending_termination_msg = generate_termination_msg(
+                reason=f"No improvement for {self.early_stopping_patience} rounds (patience exhausted)",
+                final_round=self.sm.round,
+                final_recall=self.best_global_recall
+            )
+            logging.warning(f'🛑 TRAINING TERMINATED: Early stopping triggered')
+            logging.info(f'No improvement for {self.rounds_without_improvement} rounds')
+            logging.info(f'Best global recall: {self.best_global_recall:.4f}')
+            return
+
     async def _process_polling(self, msg, websocket):
         """
         Process the polling message from agents
@@ -349,6 +445,12 @@ class Server:
         """
         logging.debug(f'--- AgentMsgType.polling ---')
         agent_id = msg[int(PollingMSGLocation.agent_id)]
+        
+        # Priority 0: Check for pending termination message (highest priority)
+        if self.pending_termination_msg is not None:
+            await send_websocket(self.pending_termination_msg, websocket)
+            logging.info(f'--- Termination message sent to {agent_id} via polling ---')
+            return
         
         # Priority 1: Check for pending rotation message
         if self.pending_rotation_msg is not None:

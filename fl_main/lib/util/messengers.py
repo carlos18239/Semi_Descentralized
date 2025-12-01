@@ -132,3 +132,21 @@ def generate_polling_message(round: int, agent_id: str):
     msg.append(round) # 1
     msg.append(agent_id) # 2
     return msg
+
+def generate_recall_up(recall_value: float, round: int, agent_id: str):
+    """Generate recall upload message from agent to aggregator."""
+    msg = list()
+    msg.append(AgentMsgType.recall_upload)  # 0
+    msg.append(recall_value)  # 1
+    msg.append(round)  # 2
+    msg.append(agent_id)  # 3
+    return msg
+
+def generate_termination_msg(reason: str, final_round: int, final_recall: float):
+    """Generate termination message to notify agents that training is complete."""
+    msg = list()
+    msg.append(AggMsgType.termination)  # 0
+    msg.append(reason)  # 1
+    msg.append(final_round)  # 2
+    msg.append(final_recall)  # 3
+    return msg
