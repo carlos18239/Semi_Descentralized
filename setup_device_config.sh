@@ -1,6 +1,5 @@
 #!/bin/bash
 # Script para configurar cada Raspberry Pi con sus configuraciones específicas
-./setup_device_config.sh r3
 if [ -z "$1" ]; then
     echo "Usage: ./setup_device_config.sh <r1|r2|r3|r4>"
     echo ""
