@@ -32,8 +32,17 @@ while True:
 
     if role == 'agent':
         # Switch to agent client
-        print(f"role_supervisor_aggregator: role is 'agent', switching to client with args {client_args}...")
-        os.execvp(CLIENT_MODULE[0], CLIENT_MODULE + client_args)
+        print(f"role_supervisor_aggregator: role is 'agent', starting client with args {client_args}...")
+        try:
+            proc = subprocess.run(CLIENT_MODULE + client_args)
+        except KeyboardInterrupt:
+            raise
+        except Exception as e:
+            print(f"role_supervisor_aggregator: client run failed: {e}")
+            time.sleep(1)
+        # After client exits, loop back to check role again
+        time.sleep(0.5)
+        continue
 
     # run the aggregator (blocking)
     try:
