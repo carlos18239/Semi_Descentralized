@@ -276,7 +276,71 @@ class Client:
 
         # Defensive check: ensure message has expected shape
         try:
-            if resp[int(PollingMSGLocation.msg_type)] == AggMsgType.update:
+            msg_type = resp[int(0)]
+            
+            # Check for rotation message first
+            if msg_type == AggMsgType.rotation:
+                winner = resp[int(RotationMSGLocation.new_aggregator_id)]
+                winner_ip = resp[int(RotationMSGLocation.new_aggregator_ip)]
+                winner_sock = resp[int(RotationMSGLocation.new_aggregator_reg_socket)]
+                
+                logging.info(f'Received rotation via polling: winner={winner} at {winner_ip}:{winner_sock}')
+                
+                # Update configs
+                try:
+                    cfg_agent_file = set_config_file('agent')
+                    cfg_agent = read_config(cfg_agent_file)
+                    
+                    # If this agent is the winner, use its own device_ip
+                    if self.id == winner:
+                        # Winner becomes aggregator
+                        cfg_agent['role'] = 'aggregator'
+                        # Use device_ip if available, otherwise use winner_ip from message
+                        my_device_ip = cfg_agent.get('device_ip', winner_ip)
+                        if my_device_ip and my_device_ip != 'CHANGE_ME':
+                            cfg_agent['aggr_ip'] = my_device_ip
+                        else:
+                            cfg_agent['aggr_ip'] = winner_ip
+                        logging.info(f'This agent has been selected as new aggregator via polling. Promoting with IP {cfg_agent["aggr_ip"]}...')
+                    else:
+                        # Loser stays as agent, updates to point to winner
+                        cfg_agent['role'] = 'agent'
+                        cfg_agent['aggr_ip'] = winner_ip
+                        cfg_agent['reg_socket'] = str(winner_sock)
+                        logging.info(f'Updated aggregator address to {winner_ip}:{winner_sock}')
+                    
+                    write_config(cfg_agent_file, cfg_agent)
+                    
+                    # Update aggregator config as well
+                    cfg_aggr_file = set_config_file('aggregator')
+                    cfg_aggr = read_config(cfg_aggr_file)
+                    if self.id == winner:
+                        # Winner: use device_ip for aggr_ip
+                        my_device_ip = cfg_aggr.get('device_ip', winner_ip)
+                        if my_device_ip and my_device_ip != 'CHANGE_ME':
+                            cfg_aggr['aggr_ip'] = my_device_ip
+                        else:
+                            cfg_aggr['aggr_ip'] = winner_ip
+                        cfg_aggr['role'] = 'aggregator'
+                    else:
+                        cfg_aggr['aggr_ip'] = winner_ip
+                        cfg_aggr['reg_socket'] = str(winner_sock)
+                        cfg_aggr['role'] = 'agent'
+                    write_config(cfg_aggr_file, cfg_aggr)
+                except Exception as e:
+                    logging.error(f'Failed to persist rotation config: {e}')
+                
+                # If promoted, exit to let supervisor restart as aggregator
+                if self.id == winner:
+                    logging.info('Exiting to restart as aggregator...')
+                    os._exit(0)
+                else:
+                    # Update local aggregator reference and continue
+                    self.aggr_ip = winner_ip
+                    self.reg_socket = str(winner_sock)
+                return
+            
+            elif msg_type == AggMsgType.update:
                 logging.info(f'--- Global Model Received ---')
                 self.save_model_from_message(resp, GMDistributionMsgLocation)
             else: # AggMsgType is "ack"

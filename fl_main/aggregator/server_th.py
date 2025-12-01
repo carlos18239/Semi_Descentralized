@@ -57,10 +57,17 @@ class Server:
         except Exception as e:
             logging.warning(f"No se pudo inicializar DB desde Server (se intentará usar fichero existente): {e}")
 
-        # Set up FL server's advertised IP address (override if mismatch)
+        # Set up FL server's advertised IP address
+        # Prefer device_ip if set, otherwise use aggr_ip, fallback to detected host IP
+        device_ip = self.config.get('device_ip')
         configured_ip = self.config.get('aggr_ip', '')
         host_ip = get_ip()
-        if configured_ip and configured_ip != host_ip:
+        
+        if device_ip and device_ip != 'CHANGE_ME':
+            # Use explicitly configured device IP
+            self.aggr_ip = device_ip
+            logging.info(f"Using configured device_ip: {self.aggr_ip}")
+        elif configured_ip and configured_ip != host_ip:
             logging.warning(f"Configured aggr_ip {configured_ip} != host IP {host_ip}; using host IP for advertising.")
             self.aggr_ip = host_ip
         else:

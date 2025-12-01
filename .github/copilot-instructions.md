@@ -33,6 +33,7 @@ python -m examples.minimal.minimal_MLEngine 1 50001 a1
 
 Project-specific conventions & patterns
 - Config files live in `setups/` and are loaded via `fl_main.lib.util.helpers.set_config_file()` which builds paths from the current working directory. Always run commands from the repository root.
+- **Device-specific configs**: Each Raspberry Pi device MUST have its own `device_ip` configured in both `config_agent.json` and `config_aggregator.json`. This ensures correct IP advertising during rotation. Use `setup_device_config.sh <r1|r2|r3>` to generate device-specific configs. Never commit configs with `device_ip: "CHANGE_ME"` to production deployments.
 - Model/state files: agent-local models and state files are saved under the path configured by `config_agent.json` (default `./data/agents/<agent_name>`). Filenames are `lms.binaryfile`, `gms.binaryfile`, and `state`.
 - Message format: messages are plain Python lists pickled before sending. The code uses numeric index enums in `states.py` (e.g. `ParticipateMSGLocation`, `ModelUpMSGLocation`, `GMDistributionMsgLocation`). Do not change list order without updating both sender and receiver.
 - ID generation: IDs and model IDs are SHA256 hashes (see `helpers.generate_id` & `generate_model_id`). They are non-deterministic in tests unless mocked.
@@ -54,10 +55,11 @@ Testing and debugging tips specific to this repo
 - Rotation behavior: aggregator may `os._exit(0)` to yield the role; `role_supervisor.py` will restart appropriate process based on `role` in configs. Avoid in-place edits that assume the process remains running after rotation.
 - **Database errors**: "unable to open database file" means the `db_data_path` directory (default `./db`) doesn't exist. The aggregator now auto-creates it, but ensure you run from repo root where `setups/config_*.json` are visible.
 - **Log noise**: Background agent wait routine now uses `agent_wait_interval` (default 10s). `cleanup_old_agents` logs at INFO only when rows deleted; enable DEBUG to see periodic scans.
+- **Device configuration**: Use `setup_device_config.sh` to generate correct per-device configs. See `DEPLOYMENT.md` for detailed Raspberry Pi cluster setup.
 
 Guidance for AI code edits
 - Prefer focused, minimal changes. This codebase relies on strict message ordering and pickled objects — refactors that change list orders/types must update both ends and `messengers.py` and `states.py` simultaneously.
 - When adding new message fields, update both `messengers.generate_*` helpers and the corresponding `*MSGLocation` enum in `states.py`, and update all readers to use `int(...)` indexing as the codebase does.
 - For changes to concurrency (async/threads), add tests exercising a real socket (local `websockets`) or a small integration run: start PseudoDB → Aggregator → Agent(s) in separate terminals or subprocesses.
 
-If anything here is unclear or you'd like me to include more examples (e.g., a minimal unit test skeleton or CI commands), tell me what to expand.
+For detailed deployment instructions, see `DEPLOYMENT.md`. If anything here is unclear or you'd like me to include more examples (e.g., a minimal unit test skeleton or CI commands), tell me what to expand.

@@ -1,4 +1,5 @@
 {
+  "device_ip": "CHANGE_ME",
   "aggr_ip": "172.23.197.150",
   "reg_socket": "8765",
   "model_path": "./data/agents",

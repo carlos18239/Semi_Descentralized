@@ -1,4 +1,5 @@
 {
+  "device_ip": "CHANGE_ME",
   "aggr_ip": "172.23.197.150",
   "db_ip": "172.23.211.109",
   "reg_socket": "8765",
