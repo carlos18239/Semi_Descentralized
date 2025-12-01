@@ -5,7 +5,7 @@ import random
 import os
 from fl_main.lib.util.communication_handler import init_fl_server, send, send_websocket, receive 
 from fl_main.lib.util.data_struc import convert_LDict_to_Dict
-from fl_main.lib.util.helpers import read_config, set_config_file, write_config
+from fl_main.lib.util.helpers import read_config, set_config_file, write_config, get_ip
 from fl_main.lib.util.messengers import generate_rotation_message, generate_db_push_message, generate_ack_message, \
      generate_cluster_model_dist_message, generate_agent_participation_confirm_message
 from fl_main.lib.util.states import ParticipateMSGLocation, RotationMSGLocation, ModelUpMSGLocation, PollingMSGLocation, \
@@ -57,8 +57,14 @@ class Server:
         except Exception as e:
             logging.warning(f"No se pudo inicializar DB desde Server (se intentará usar fichero existente): {e}")
 
-        # Set up FL server's IP address
-        self.aggr_ip = self.config['aggr_ip']
+        # Set up FL server's advertised IP address (override if mismatch)
+        configured_ip = self.config.get('aggr_ip', '')
+        host_ip = get_ip()
+        if configured_ip and configured_ip != host_ip:
+            logging.warning(f"Configured aggr_ip {configured_ip} != host IP {host_ip}; using host IP for advertising.")
+            self.aggr_ip = host_ip
+        else:
+            self.aggr_ip = host_ip if not configured_ip else configured_ip
 
         # port numbers, websocket info
         self.reg_socket = self.config['reg_socket']
@@ -78,6 +84,8 @@ class Server:
         self.agent_wait_interval = int(self.config.get('agent_wait_interval', 10))
         # TTL (in seconds) to consider DB agent entries stale and eligible for cleanup
         self.agent_ttl_seconds = int(self.config.get('agent_ttl_seconds', 300))
+        # Pending rotation message (for polling mode)
+        self.pending_rotation_msg = None
         self._init_round_from_db()
         # Load agent entries from DB into a pending list. Actual connection
         # and adding to StateManager happens in a background coroutine
@@ -323,8 +331,15 @@ class Server:
         :return:
         """
         logging.debug(f'--- AgentMsgType.polling ---')
-        # print(f'current round:', self.sm.round)
-        # print(f'reported round:', str(msg[int(PollingMSGLocation.round)]))
+        agent_id = msg[int(PollingMSGLocation.agent_id)]
+        
+        # Priority 1: Check for pending rotation message
+        if self.pending_rotation_msg is not None:
+            await send_websocket(self.pending_rotation_msg, websocket)
+            logging.info(f'--- Rotation message sent to {agent_id} via polling ---')
+            return
+        
+        # Priority 2: Check for new global model
         if self.sm.round > int(msg[int(PollingMSGLocation.round)]):
             # Defensive: if no cluster models exist yet, respond with ACK
             # to indicate no model is available rather than crashing.
@@ -338,11 +353,11 @@ class Server:
             cluster_models = convert_LDict_to_Dict(self.sm.cluster_models)
             gm_msg = generate_cluster_model_dist_message(self.sm.id, model_id, self.sm.round, cluster_models)
             await send_websocket(gm_msg, websocket)
-            logging.info(f'--- Global Models Sent to {msg[int(PollingMSGLocation.agent_id)]} ---')
+            logging.info(f'--- Global Models Sent to {agent_id} ---')
         else:
             logging.info(f'--- Polling: Global model is not ready yet ---')
-            msg = generate_ack_message()
-            await send_websocket(msg, websocket)
+            ack_msg = generate_ack_message()
+            await send_websocket(ack_msg, websocket)
 
     async def model_synthesis_routine(self):
         """
@@ -455,37 +470,43 @@ class Server:
         models = convert_LDict_to_Dict(self.sm.cluster_models)
         rot_msg = generate_rotation_message(winner, winner_ip, winner_sock, model_id, self.sm.round, models, scores)
 
-        async def _send_rotation_direct(msg, ip, socket_num):
-            wsaddr = f'ws://{ip}:{socket_num}'
-            try:
-                async with websockets.connect(wsaddr, ping_interval=None) as websocket:
-                    await websocket.send(pickle.dumps(msg))
-                return True
-            except Exception as e:
-                logging.debug(f'Rotation send attempt failed to {ip}:{socket_num} -> {e}')
-                return False
+        # In polling mode, store rotation message for delivery via next poll
+        if self.is_polling:
+            self.pending_rotation_msg = rot_msg
+            logging.info(f'Rotation prepared for polling delivery. Winner: {winner} ({winner_ip}:{winner_sock}) score {winner_score}')
+            # Give agents a moment to poll and receive rotation
+            await asyncio.sleep(3)
+        else:
+            # Push mode: actively send rotation to agents
+            async def _send_rotation_direct(msg, ip, socket_num):
+                wsaddr = f'ws://{ip}:{socket_num}'
+                try:
+                    async with websockets.connect(wsaddr, ping_interval=None) as websocket:
+                        await websocket.send(pickle.dumps(msg))
+                    return True
+                except Exception as e:
+                    logging.debug(f'Rotation send attempt failed to {ip}:{socket_num} -> {e}')
+                    return False
 
-        # Retry delivery to all; especially winner must succeed
-        winner_delivered = False
-        max_attempts = 5
-        for attempt in range(1, max_attempts + 1):
-            logging.info(f'Rotation broadcast attempt {attempt}/{max_attempts}')
-            # Send to each agent
-            for agent in agents:
-                delivered = await _send_rotation_direct(rot_msg, agent['agent_ip'], int(agent['socket']))
-                if delivered:
-                    logging.info(f'Rotation message delivered to {agent["agent_id"]} at {agent["agent_ip"]}:{agent["socket"]}')
-                else:
-                    logging.warning(f'Rotation message NOT delivered to {agent["agent_id"]} at {agent["agent_ip"]}:{agent["socket"]}')
-                if agent['agent_id'] == winner and delivered:
-                    winner_delivered = True
-            if winner_delivered:
-                break
-            await asyncio.sleep(2)
+            winner_delivered = False
+            max_attempts = 5
+            for attempt in range(1, max_attempts + 1):
+                logging.info(f'Rotation broadcast attempt {attempt}/{max_attempts}')
+                for agent in agents:
+                    delivered = await _send_rotation_direct(rot_msg, agent['agent_ip'], int(agent['socket']))
+                    if delivered:
+                        logging.info(f'Rotation message delivered to {agent["agent_id"]} at {agent["agent_ip"]}:{agent["socket"]}')
+                    else:
+                        logging.warning(f'Rotation message NOT delivered to {agent["agent_id"]} at {agent["agent_ip"]}:{agent["socket"]}')
+                    if agent['agent_id'] == winner and delivered:
+                        winner_delivered = True
+                if winner_delivered:
+                    break
+                await asyncio.sleep(2)
 
-        if not winner_delivered:
-            logging.error('Rotation failed: winner did not receive rotation message after retries; keeping current role.')
-            return
+            if not winner_delivered:
+                logging.error('Rotation failed: winner did not receive rotation message after retries; keeping current role.')
+                return
 
         # Persist config changes for this node (demote self)
         try:
