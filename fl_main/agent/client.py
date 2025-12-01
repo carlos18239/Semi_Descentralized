@@ -137,27 +137,48 @@ class Client:
 
         if resp is None:
             logging.warning('No response from aggregator after retries')
+            sys.stdout.flush()  # Force flush logs
+            
             logging.info('🔍 Checking if I should self-promote to aggregator...')
+            sys.stdout.flush()
+            
             logging.info(f'   Current aggr_ip value: "{self.aggr_ip}" (type: {type(self.aggr_ip).__name__})')
             logging.info(f'   Is empty? {not self.aggr_ip}')
             logging.info(f'   In invalid list? {self.aggr_ip in ["", "0.0.0.0", "localhost", "127.0.0.1", "CHANGE_ME"]}')
+            sys.stdout.flush()
             
             # Check if aggr_ip is invalid/empty - indicates no aggregator exists
             # Must check for empty string explicitly since '' is falsy
-            should_promote = (
-                not self.aggr_ip or 
-                self.aggr_ip.strip() == '' or
-                self.aggr_ip in ['0.0.0.0', 'localhost', '127.0.0.1', 'CHANGE_ME']
-            )
+            try:
+                should_promote = (
+                    not self.aggr_ip or 
+                    self.aggr_ip.strip() == '' or
+                    self.aggr_ip in ['0.0.0.0', 'localhost', '127.0.0.1', 'CHANGE_ME']
+                )
+                logging.info(f'   Should promote? {should_promote}')
+                sys.stdout.flush()
+            except Exception as e:
+                logging.error(f'Error checking should_promote: {e}')
+                should_promote = True  # Default to promoting if error
             
             if should_promote:
                 logging.info('⚡ No valid aggregator configured - self-promoting to aggregator!')
-                self._promote_to_aggregator()
-                logging.info('✅ Promotion complete - exiting to restart as aggregator')
-                os._exit(0)
+                sys.stdout.flush()
+                try:
+                    self._promote_to_aggregator()
+                    logging.info('✅ Promotion complete - exiting to restart as aggregator')
+                    sys.stdout.flush()
+                    os._exit(0)
+                except Exception as e:
+                    logging.error(f'❌ Promotion failed: {e}')
+                    import traceback
+                    traceback.print_exc()
+                    sys.stdout.flush()
+                    os._exit(1)
             else:
                 logging.error(f'Aggregator {self.aggr_ip}:{self.reg_socket} not reachable - cannot participate')
                 logging.error('participate() aborting')
+                sys.stdout.flush()
                 return
 
         # Parse the response message (guard against unexpected format)
