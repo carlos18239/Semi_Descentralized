@@ -443,8 +443,17 @@ class Server:
 
                 # Push cluster model to DB
                 await self._push_cluster_models()
+
+                # In push mode, send cluster models immediately
+                if self.is_polling == False:
+                    await self._send_cluster_models_to_all()
+
+                # increment the aggregation round number
+                self.sm.increment_round()
                 
-                # Check if rotation should occur (only after min rounds and at intervals)
+                # Check if rotation should occur AFTER incrementing round
+                # This ensures agents receive and train with the current round's model
+                # before rotation happens
                 should_rotate = (
                     self.sm.round >= self.rotation_min_rounds and
                     (self.sm.round - self.last_rotation_round) >= self.rotation_interval
@@ -455,12 +464,6 @@ class Server:
                     await self._choose_and_broadcast_new_aggregator()
                     self.last_rotation_round = self.sm.round
                     logging.info(f"Rotation scheduled at round {self.sm.round}")
-
-                if self.is_polling == False:
-                    await self._send_cluster_models_to_all()
-
-                # increment the aggregation round number
-                self.sm.increment_round()
 
     async def _send_cluster_models_to_all(self):
         """

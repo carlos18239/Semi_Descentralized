@@ -109,6 +109,14 @@ def judge_termination(training_count: int = 0, gm_arrival_count: int = 0) -> boo
     :return: bool - True if it continues the training loop; False if it stops
     """
 
+    # Limit training to a reasonable number of rounds for testing rotation
+    # Set to a higher number (e.g., 100) for production training
+    MAX_ROUNDS = 10
+    
+    if training_count >= MAX_ROUNDS:
+        logging.info(f'--- Reached maximum training rounds ({MAX_ROUNDS}), terminating ---')
+        return False
+    
     # could call a performance tracker to check if the current models satisfy the required performance
     return True
 
