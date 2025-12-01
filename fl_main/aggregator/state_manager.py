@@ -130,8 +130,25 @@ class StateManager:
         :param models: Dict[str, np.array]
         :return:
         """
+        # If we haven't learned the model names/structure yet, initialize
+        # them from the first models we receive. This avoids KeyError when
+        # agents send their first trained models before a participation
+        # registration that would otherwise call initialize_model_info().
+        if len(self.mnames) == 0:
+            logging.info('Model names not initialized yet, initializing from first upload')
+            # Initialize model names and internal buffers; do not keep weights
+            # as cluster initial weights by default here.
+            try:
+                self.initialize_model_info(models, init_weights_flag=False)
+            except Exception as e:
+                logging.error(f'Failed to initialize model info from upload: {e}')
+
         if not participate:  # if it is an actual models (not in participation message)
             for key, model in models.items():
+                # Guard against unexpected names defensively
+                if key not in self.local_model_buffers:
+                    logging.warning(f'Unexpected model name received: {key}; creating buffer entry')
+                    self.local_model_buffers[key] = []
                 self.local_model_buffers[key].append(model)
 
             try:

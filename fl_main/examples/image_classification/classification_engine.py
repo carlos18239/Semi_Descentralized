@@ -11,13 +11,21 @@ from .conversion import Converter
 from .ic_training import DataManger, execute_ic_training
 
 from fl_main.agent.client import Client
+from fl_main.lib.util.helpers import set_config_file, read_config
+import subprocess, sys
 
+cfg = read_config(set_config_file('agent'))
+role = cfg.get('role', 'agent')
+if role == 'aggregator':
+    logging.info('Starting aggregator server on this node (role==aggregator)')
+    subprocess.Popen(["python", "-m", "fl_main.aggregator.server_th"])
+    sys.exit(0)
 
 class TrainingMetaData:
     # The number of training data used for each round
     # This will be used for the weighted averaging
     # Set to a natural number > 0
-    num_training_data = 8000
+    num_training_data = 500
 
 def init_models() -> Dict[str,np.array]:
     """

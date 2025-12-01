@@ -1,14 +1,16 @@
 import asyncio, logging, time, numpy as np
+import websockets
 from typing import List, Dict, Any
-
+import random
+import os
 from fl_main.lib.util.communication_handler import init_fl_server, send, send_websocket, receive 
 from fl_main.lib.util.data_struc import convert_LDict_to_Dict
-from fl_main.lib.util.helpers import read_config, set_config_file
-from fl_main.lib.util.messengers import generate_db_push_message, generate_ack_message, \
+from fl_main.lib.util.helpers import read_config, set_config_file, write_config
+from fl_main.lib.util.messengers import generate_rotation_message, generate_db_push_message, generate_ack_message, \
      generate_cluster_model_dist_message, generate_agent_participation_confirm_message
-from fl_main.lib.util.states import ParticipateMSGLocation, ModelUpMSGLocation, PollingMSGLocation, \
+from fl_main.lib.util.states import ParticipateMSGLocation, RotationMSGLocation, ModelUpMSGLocation, PollingMSGLocation, \
      ModelType, AgentMsgType
-
+from fl_main.pseudodb.sqlite_db import SQLiteDBHandler
 from .state_manager import StateManager
 from .aggregation import Aggregator
 
@@ -31,6 +33,30 @@ class Server:
         self.sm = StateManager()
         self.agg = Aggregator(self.sm)  # aggregation functions
 
+        # Config de la DB (la misma que usa PseudoDB)
+        db_config_file = set_config_file("db")
+        db_config = read_config(db_config_file)
+
+        db_data_path = db_config['db_data_path']
+        db_name = db_config['db_name']
+        
+        # Create DB directory if it doesn't exist
+        if not os.path.exists(db_data_path):
+            os.makedirs(db_data_path)
+        
+        # Create models directory if specified
+        db_model_path = db_config.get('db_model_path')
+        if db_model_path and not os.path.exists(db_model_path):
+            os.makedirs(db_model_path)
+        
+        self.db_file = f'{db_data_path}/{db_name}.db'   # ./db/sample_data.db
+        self.dbhandler = SQLiteDBHandler(self.db_file)
+        try:
+            # Ensure DB schema exists (idempotent)
+            self.dbhandler.initialize_DB()
+        except Exception as e:
+            logging.warning(f"No se pudo inicializar DB desde Server (se intentará usar fichero existente): {e}")
+
         # Set up FL server's IP address
         self.aggr_ip = self.config['aggr_ip']
 
@@ -48,8 +74,94 @@ class Server:
         self.sm.agg_threshold = self.config['aggregation_threshold']
 
         self.is_polling = bool(self.config['polling'])
+        # TTL (in seconds) to consider DB agent entries stale and eligible for cleanup
+        self.agent_ttl_seconds = int(self.config.get('agent_ttl_seconds', 300))
+        self._init_round_from_db()
+        # Load agent entries from DB into a pending list. Actual connection
+        # and adding to StateManager happens in a background coroutine
+        # that waits for agents to become reachable.
+        self._load_agents_from_db()
+        self.db_agents = []
 
+    def _init_round_from_db(self):
+        try:
+            max_round = self.dbhandler.get_max_round(ModelType.cluster)
+        except Exception as e:
+            logging.error(f"No se pudo leer MAX(round) desde DB, inicio en 0. Error: {e}")
+            self.sm.round = 0
+            return
 
+        self.sm.round = max_round
+        logging.info(f"Round inicial cargado desde DB: {self.sm.round}")
+
+    def _load_agents_from_db(self):
+        """
+        Carga agentes desde la tabla 'agents' y los guarda en `self.db_agents`.
+        No se añaden todavía a `StateManager` para evitar asumir que están
+        conectados; una rutina en background intentará conectar y añadirlos
+        cuando estén disponibles.
+        """
+        try:
+            rows = self.dbhandler.get_all_agents()
+        except Exception as e:
+            logging.error(f"No se pudieron cargar agentes desde DB: {e}")
+            return
+        if not rows:
+            logging.info("No hay agentes registrados en la tabla 'agents'.")
+            self.db_agents = []
+            return
+
+        # Store rows to be processed by the background waiter
+        self.db_agents = rows
+        logging.info(f"Agentes cargados desde DB en memoria (pendientes): {self.db_agents}")
+
+    async def _wait_for_agents_routine(self):
+        """
+        Rutina en background que intenta conectar periódicamente con los
+        agentes almacenados en DB. Cuando un agente responde, se añade al
+        `StateManager` y se actualiza su `last_seen` en la DB.
+        """
+        logging.info("Iniciando rutina de espera de agentes desde DB...")
+        while True:
+            # Cleanup stale agents in DB before attempting connections
+            try:
+                self.dbhandler.cleanup_old_agents(self.agent_ttl_seconds)
+            except Exception as e:
+                logging.debug(f"Error ejecutando cleanup_old_agents: {e}")
+            # Reload DB list in case new agents were added by registraciones
+            try:
+                rows = self.dbhandler.get_all_agents()
+            except Exception as e:
+                logging.error(f"Error leyendo agentes desde DB en waiter: {e}")
+                rows = []
+
+            for agent_id, ip, socket in rows:
+                # Skip if already in StateManager
+                if any(a.get('agent_id') == agent_id for a in self.sm.agent_set):
+                    continue
+
+                wsaddr = f'ws://{ip}:{socket}'
+                try:
+                    # Try to open a short-lived connection to check reachability
+                    async with websockets.connect(wsaddr, ping_interval=None) as websocket:
+                        logging.info(f'Agente {agent_id} reachable at {ip}:{socket}')
+                        # Add to StateManager
+                        try:
+                            self.sm.add_agent(agent_id, agent_id, ip, socket)
+                        except Exception as e:
+                            logging.error(f"Error añadiendo agente {agent_id} a StateManager: {e}")
+
+                        # Update DB (upsert) to refresh last_seen
+                        try:
+                            self.dbhandler.upsert_agent(agent_id, ip, int(socket))
+                        except Exception as e:
+                            logging.error(f"Error actualizando agente {agent_id} en DB: {e}")
+                except Exception:
+                    logging.debug(f'Agente {agent_id} no disponible aún en {ip}:{socket}')
+
+            # Sleep some time before next poll; keep light frequency
+            await asyncio.sleep(2)
+    
     async def register(self, websocket: str, path):
         """
         Receiving the participation message specifying the model structures
@@ -72,7 +184,17 @@ class Server:
         agent_id = msg[int(ParticipateMSGLocation.agent_id)]
         addr = msg[int(ParticipateMSGLocation.agent_ip)]
 
+        logging.info(f"register(): participation message from agent_name={agent_name}, agent_id={agent_id}, addr={addr}, exch_socket={es}")
+
         uid, ues = self.sm.add_agent(agent_name, agent_id, addr, es)
+        try:
+            ok = self.dbhandler.upsert_agent(agent_id, addr, int(es))
+            if ok:
+                logging.info(f"register(): agent {agent_id} saved/updated in DB (ip={addr}, socket={es})")
+            else:
+                logging.warning(f"register(): upsert_agent returned False for {agent_id} (ip={addr}, socket={es})")
+        except Exception as e:
+            logging.error(f"No se pudo guardar/actualizar agente {agent_id} en DB: {e}")
 
         # If the weights in the first models should be used as the init models
         # The very first agent connecting to the aggregator decides the shape of the models
@@ -130,11 +252,20 @@ class Server:
         :param es: Port of the agent
         :return:
         """
-        model_id = self.sm.cluster_model_ids[-1]
-        cluster_models = convert_LDict_to_Dict(self.sm.cluster_models)
+        # Defensive: cluster_model_ids may be empty if no aggregation has
+        # yet occurred. In that case send an empty models dict and empty id
+        # so the agent can proceed without crashing the server.
+        if not getattr(self.sm, 'cluster_model_ids', None):
+            model_id = ''
+            cluster_models = {}
+            logging.debug(f'_send_updated_global_model: no cluster models yet for agent {agent_id}')
+        else:
+            model_id = self.sm.cluster_model_ids[-1]
+            cluster_models = convert_LDict_to_Dict(self.sm.cluster_models)
+
         reply = generate_agent_participation_confirm_message(
-            self.sm.id, model_id, cluster_models, 
-            self.sm.round, agent_id, exch_socket, self.recv_socket)
+            self.sm.id, model_id, cluster_models,
+            self.sm.round, agent_id, exch_socket, self.recv_socket, self.aggr_ip)
         await send_websocket(reply, websocket)
         logging.info(f'--- Global Models Sent to {agent_id} ---')
 
@@ -169,8 +300,18 @@ class Server:
         logging.info('--- Local Model Received ---')
         logging.debug(f'Local models: {lmodels}')
 
+        # Debug: log model keys and buffer state before/after
+        try:
+            logging.info(f"_process_lmodel_upload: agent_id={agent_id} model_id={model_id} num_keys={len(list(lmodels.keys()))}")
+        except Exception:
+            pass
+
         # Store local models in the buffer
-        self.sm.buffer_local_models(lmodels, participate=False, meta_data=perf_val)
+        try:
+            self.sm.buffer_local_models(lmodels, participate=False, meta_data=perf_val)
+            logging.info(f"_process_lmodel_upload: buffer size now={len(self.sm.local_models_buffer) if hasattr(self.sm, 'local_models_buffer') else 'unknown'}")
+        except Exception as e:
+            logging.error(f"Error buffering local models from {agent_id}: {e}")
 
     async def _process_polling(self, msg, websocket):
         """
@@ -183,6 +324,14 @@ class Server:
         # print(f'current round:', self.sm.round)
         # print(f'reported round:', str(msg[int(PollingMSGLocation.round)]))
         if self.sm.round > int(msg[int(PollingMSGLocation.round)]):
+            # Defensive: if no cluster models exist yet, respond with ACK
+            # to indicate no model is available rather than crashing.
+            if not getattr(self.sm, 'cluster_model_ids', None):
+                logging.info('Polling: no cluster models available yet; sending ACK')
+                ack_msg = generate_ack_message()
+                await send_websocket(ack_msg, websocket)
+                return
+
             model_id = self.sm.cluster_model_ids[-1]
             cluster_models = convert_LDict_to_Dict(self.sm.cluster_models)
             gm_msg = generate_cluster_model_dist_message(self.sm.id, model_id, self.sm.round, cluster_models)
@@ -214,7 +363,9 @@ class Server:
 
                 # Push cluster model to DB
                 await self._push_cluster_models()
-                
+                # Broadcast rotation and choose next aggregator
+                await self._choose_and_broadcast_new_aggregator()
+
                 if self.is_polling == False:
                     await self._send_cluster_models_to_all()
 
@@ -226,13 +377,21 @@ class Server:
         Send out cluster models to all agents under this aggregator
         :return:
         """
+        # Defensive: if no cluster models yet, nothing to send
+        if not getattr(self.sm, 'cluster_model_ids', None):
+            logging.info('_send_cluster_models_to_all: no cluster models to distribute')
+            return
+
         model_id = self.sm.cluster_model_ids[-1]
         cluster_models = convert_LDict_to_Dict(self.sm.cluster_models)
 
         msg = generate_cluster_model_dist_message(self.sm.id, model_id, self.sm.round, cluster_models)
         for agent in self.sm.agent_set:
-            await send(msg, agent['agent_ip'], agent['socket'])
-            logging.info(f'--- Global Models Sent to {agent["agent_id"]} ---')
+            try:
+                await send(msg, agent['agent_ip'], agent['socket'])
+                logging.info(f'--- Global Models Sent to {agent["agent_id"]} ---')
+            except Exception as e:
+                logging.error(f'Failed to send cluster models to {agent.get("agent_id")} : {e}')
 
     async def _push_local_models(self, agent_id: str, model_id: str, local_models: Dict[str, np.array],\
                                  gene_time: float, performance: Dict[str, float]) -> List[Any]:
@@ -258,6 +417,76 @@ class Server:
         models = convert_LDict_to_Dict(self.sm.cluster_models)
         meta_dict = dict({"num_samples" : self.sm.own_cluster_num_samples})
         return await self._push_models(self.sm.id, ModelType.cluster, models, model_id, time.time(), meta_dict)
+
+    async def _choose_and_broadcast_new_aggregator(self):
+        # Use the set of currently-connected agents from StateManager to
+        # avoid sending rotation messages to stale DB addresses.
+        agents = list(self.sm.agent_set)
+        # If no connected agents, try DB as fallback
+        if not agents:
+            rows = self.dbhandler.get_all_agents()  # (agent_id, ip, socket)
+            if not rows:
+                logging.info("No agents available for rotation.")
+                return
+            agents = [{'agent_id': aid, 'agent_ip': ip, 'socket': int(sock)} for (aid, ip, sock) in rows]
+
+        # generate random scores for connected agents
+        scores = {}
+        for agent in agents:
+            scores[agent['agent_id']] = random.randint(1, 10)
+        # include current aggregator as candidate
+        scores[self.sm.id] = random.randint(1, 10)
+
+        # choose winner: highest score then lexicographically by id
+        winner, winner_score = max(scores.items(), key=lambda kv: (kv[1], kv[0]))
+
+        # find winner ip/socket among connected agents; if winner is this aggregator, use local config
+        winner_ip, winner_sock = None, None
+        if winner == self.sm.id:
+            winner_ip = self.aggr_ip
+            winner_sock = int(self.reg_socket)
+        else:
+            for agent in agents:
+                if agent['agent_id'] == winner:
+                    winner_ip = agent.get('agent_ip')
+                    winner_sock = int(agent.get('socket'))
+                    break
+
+        # prepare rotation message and current cluster model
+        model_id = self.sm.cluster_model_ids[-1] if self.sm.cluster_model_ids else ''
+        models = convert_LDict_to_Dict(self.sm.cluster_models)
+
+        rot_msg = generate_rotation_message(winner, winner_ip, winner_sock, model_id, self.sm.round, models, scores)
+
+        # send rotation message to connected agents
+        for agent in agents:
+            try:
+                await send(rot_msg, agent['agent_ip'], int(agent['socket']))
+                logging.info(f'Sent rotation message to {agent.get("agent_id")} at {agent.get("agent_ip")}:{agent.get("socket")}')
+            except Exception as e:
+                logging.error(f'Failed to send rotation to {agent.get("agent_id")} at {agent.get("agent_ip")}:{agent.get("socket")} : {e}')
+
+        # persist local config changes (this node will stop being aggregator)
+        try:
+            cfg_agent_file = set_config_file('agent')
+            cfg_agent = read_config(cfg_agent_file)
+            cfg_agent['role'] = 'agent'
+            write_config(cfg_agent_file, cfg_agent)
+
+            cfg_aggr_file = set_config_file('aggregator')
+            cfg_aggr = read_config(cfg_aggr_file)
+            cfg_aggr['aggr_ip'] = winner_ip
+            cfg_aggr['reg_socket'] = str(winner_sock)
+            cfg_aggr['role'] = 'agent'
+            write_config(cfg_aggr_file, cfg_aggr)
+        except Exception as e:
+            logging.error(f'Failed to persist local config change after rotation: {e}')
+
+        logging.info(f'Rotation completed. Selected new aggregator {winner} ({winner_ip}:{winner_sock}) score {winner_score}')
+
+        # Exit now to yield aggregator role (supervisor/classification_engine should restart in agent mode)
+        os._exit(0)
+
 
     async def _push_models(self,
                            component_id: str,
@@ -290,7 +519,12 @@ if __name__ == "__main__":
     s = Server()
     logging.info("--- Aggregator Started ---")
 
-    init_fl_server(s.register, 
-                   s.receive_msg_from_agent, 
-                   s.model_synthesis_routine(), 
-                   s.aggr_ip, s.reg_socket, s.recv_socket)
+    # Start FL server and background routines (model synthesis + agent waiter)
+    # Bind to 0.0.0.0 inside container for reachability, but keep
+    # `s.aggr_ip` as the advertised address used in messages.
+    bind_ip = '0.0.0.0'
+    init_fl_server(s.register,
+                   s.receive_msg_from_agent,
+                   s.model_synthesis_routine(),
+                   bind_ip, s.reg_socket, s.recv_socket,
+                   s._wait_for_agents_routine())

@@ -1,11 +1,12 @@
 {
-  "aggr_ip": "172.23.210.72",
-  "db_ip": "172.23.210.72",
+  "aggr_ip": "172.23.197.150",
+  "db_ip": "172.23.211.109",
   "reg_socket": "8765",
   "exch_socket": "7890",
   "recv_socket": "4321",
   "db_socket": "9017",
   "round_interval": 5,
-  "aggregation_threshold": 1.0,
-  "polling": 1
+  "aggregation_threshold": 1,
+  "polling": 1,
+  "role": "aggregator"
 }

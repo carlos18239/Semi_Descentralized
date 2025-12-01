@@ -5,15 +5,17 @@ import sys
 import os
 from typing import Dict, Any
 from threading import Thread
+import subprocess, sys
+import shutil
 
 from fl_main.lib.util.communication_handler import init_client_server, send, receive
 from fl_main.lib.util.helpers import read_config, init_loop, \
      save_model_file, load_model_file, read_state, write_state, generate_id, \
      set_config_file, get_ip, compatible_data_dict_read, generate_model_id, \
      create_data_dict_from_models, create_meta_data_dict
-from fl_main.lib.util.states import IDPrefix, ClientState, AggMsgType, ParticipateConfirmationMSGLocation, GMDistributionMsgLocation, PollingMSGLocation
+from fl_main.lib.util.states import IDPrefix, ClientState, AggMsgType, ParticipateConfirmationMSGLocation, GMDistributionMsgLocation, PollingMSGLocation, RotationMSGLocation
 from fl_main.lib.util.messengers import generate_lmodel_update_message, generate_agent_participation_message, generate_polling_message
-
+from fl_main.lib.util.helpers import write_config,set_config_file,read_config
 class Client:
     """
     Client class instance provides the communication interface
@@ -61,6 +63,29 @@ class Client:
         if not os.path.exists(self.model_path):
             os.makedirs(self.model_path)
 
+        # Ensure local model files exist; if not, try to copy defaults from
+        # `models/default_agent` in the repository so agents can start in tests.
+        try:
+            lm_path = os.path.join(self.model_path, self.lmfile)
+            gm_path = os.path.join(self.model_path, self.gmfile)
+            if not os.path.exists(lm_path) or not os.path.exists(gm_path):
+                repo_default_dir = os.path.join(os.getcwd(), 'models', 'default_agent')
+                src_lm = os.path.join(repo_default_dir, self.lmfile)
+                src_gm = os.path.join(repo_default_dir, self.gmfile)
+                if os.path.exists(src_lm):
+                    try:
+                        shutil.copyfile(src_lm, lm_path)
+                    except Exception:
+                        pass
+                if os.path.exists(src_gm):
+                    try:
+                        shutil.copyfile(src_gm, gm_path)
+                    except Exception:
+                        pass
+        except Exception:
+            # Non-fatal; agent can still try to proceed and will fail later if truly missing
+            pass
+
         self.lmfile = self.config['local_model_file_name']
         self.gmfile = self.config['global_model_file_name']
         self.statefile = self.config['state_file_name']
@@ -91,22 +116,49 @@ class Client:
         msg = generate_agent_participation_message(
                 self.agent_name, self.id, model_id, models, self.init_weights_flag, self.simulation_flag,
                 self.exch_socket, gene_time, performance_dict, self.agent_ip)
-        resp = await send(msg, self.aggr_ip, self.reg_socket)
+        # Send participation message with retries if aggregator doesn't reply
+        # Aggressively retry registration since aggregator may be still
+        # starting. Increase retries to tolerate startup races in compose.
+        max_retries = 12
+        resp = None
+        for attempt in range(1, max_retries + 1):
+            resp = await send(msg, self.aggr_ip, self.reg_socket)
+            logging.debug(msg)
+            logging.info(f"--- Init Response (attempt {attempt}): {resp} ---")
+            if resp is None:
+                # Backoff before retrying (increasing delay)
+                await asyncio.sleep(min(1 * attempt, 10))
+                continue
+            break
 
-        logging.debug(msg)
-        logging.info(f"--- Init Response: {resp} ---")
+        if resp is None:
+            logging.error('No response from aggregator after retries; participate() aborting')
+            return
 
-        # Parse the response message
-        # including some socket info and the actual round number
-        self.round = resp[int(ParticipateConfirmationMSGLocation.round)]
-        self.exch_socket = resp[int(ParticipateConfirmationMSGLocation.exch_socket)]
-        self.msend_socket = resp[int(ParticipateConfirmationMSGLocation.recv_socket)]
-        self.id = resp[int(ParticipateConfirmationMSGLocation.agent_id)]
+        # Parse the response message (guard against unexpected format)
+        try:
+            self.round = resp[int(ParticipateConfirmationMSGLocation.round)]
+            self.exch_socket = resp[int(ParticipateConfirmationMSGLocation.exch_socket)]
+            self.msend_socket = resp[int(ParticipateConfirmationMSGLocation.recv_socket)]
+            self.id = resp[int(ParticipateConfirmationMSGLocation.agent_id)]
 
-        # Receiving the welcome message
-        logging.info(f'--- {resp[int(ParticipateConfirmationMSGLocation.msg_type)]} Message Received ---')
+            # Receiving the welcome message
+            logging.info(f'--- {resp[int(ParticipateConfirmationMSGLocation.msg_type)]} Message Received ---')
 
-        self.save_model_from_message(resp, ParticipateConfirmationMSGLocation)
+            self.save_model_from_message(resp, ParticipateConfirmationMSGLocation)
+        except Exception as e:
+            logging.error(f'Unexpected participate() response format: {e} | resp={resp}')
+            return
+
+        # If running in simulation mode, immediately prepare/send local model
+        # so aggregator receives local updates for testing rotation.
+        if self.simulation_flag:
+            try:
+                logging.info('Simulation mode: scheduling initial local model send')
+                # send initial models (this writes local model file and sets state)
+                self.send_initial_model(models, num_samples=1, perf_val=0.0)
+            except Exception as e:
+                logging.error(f'Failed to schedule initial model send: {e}')
 
     async def model_exchange_routine(self):
         """
@@ -155,6 +207,61 @@ class Client:
 
         logging.debug(f'Models: {gm_msg}')
 
+        # If it's a rotation message
+        try:
+            msg_type = gm_msg[int(0)]
+        except Exception:
+            msg_type = None
+
+        if msg_type == AggMsgType.rotation:
+            winner = gm_msg[int(RotationMSGLocation.new_aggregator_id)]
+            winner_ip = gm_msg[int(RotationMSGLocation.new_aggregator_ip)]
+            winner_sock = gm_msg[int(RotationMSGLocation.new_aggregator_reg_socket)]
+            model_id = gm_msg[int(RotationMSGLocation.model_id)]
+            models = gm_msg[int(RotationMSGLocation.models)]
+            scores = gm_msg[int(RotationMSGLocation.rand_scores)]
+
+            logging.info(f'Received rotation: winner={winner} at {winner_ip}:{winner_sock}')
+
+            # Persist configs: default set everyone to agent; aggregator will set itself next
+            try:
+                cfg_agent_file = set_config_file('agent')
+                cfg_agent = read_config(cfg_agent_file)
+                cfg_agent['role'] = 'agent'
+                write_config(cfg_agent_file, cfg_agent)
+
+                cfg_aggr_file = set_config_file('aggregator')
+                cfg_aggr = read_config(cfg_aggr_file)
+                cfg_aggr['aggr_ip'] = winner_ip
+                cfg_aggr['reg_socket'] = str(winner_sock)
+                cfg_aggr['role'] = 'agent'
+                write_config(cfg_aggr_file, cfg_aggr)
+            except Exception as e:
+                logging.error(f'Failed to persist rotation config: {e}')
+
+            # If this agent is chosen, promote it
+            if self.id == winner:
+                logging.info('This agent has been selected as new aggregator. Promoting...')
+                try:
+                    # set role flags
+                    cfg_agent = read_config(set_config_file('agent'))
+                    cfg_agent['role'] = 'aggregator'
+                    write_config(set_config_file('agent'), cfg_agent)
+                    cfg_aggr = read_config(set_config_file('aggregator'))
+                    cfg_aggr['role'] = 'aggregator'
+                    write_config(set_config_file('aggregator'), cfg_aggr)
+                except Exception:
+                    pass
+
+                # Start server_th
+                subprocess.Popen(["python3", "-m", "fl_main.aggregator.server_th"])
+                # exit agent process to avoid double roles
+                os._exit(0)
+            else:
+                logging.info('Stayed as agent after rotation.')
+            return
+
+
         self.save_model_from_message(gm_msg, GMDistributionMsgLocation)
     
     async def process_polling(self):
@@ -162,11 +269,20 @@ class Client:
 
         msg = generate_polling_message(self.round, self.id)
         resp = await send(msg, self.aggr_ip, self.msend_socket)
-        if resp[int(PollingMSGLocation.msg_type)] == AggMsgType.update:
-            logging.info(f'--- Global Model Received ---')
-            self.save_model_from_message(resp, GMDistributionMsgLocation)
-        else: # AggMsgType is "ack"
-            logging.info(f'--- Global Model is NOT ready (ACK) ---')
+        # `send` can return None on connection failure or when no reply is sent.
+        if resp is None:
+            logging.warning('No response received from aggregator during polling (resp is None)')
+            return
+
+        # Defensive check: ensure message has expected shape
+        try:
+            if resp[int(PollingMSGLocation.msg_type)] == AggMsgType.update:
+                logging.info(f'--- Global Model Received ---')
+                self.save_model_from_message(resp, GMDistributionMsgLocation)
+            else: # AggMsgType is "ack"
+                logging.info(f'--- Global Model is NOT ready (ACK) ---')
+        except Exception as e:
+            logging.error(f'Unexpected polling response format: {e} | resp={resp}')
 
 
     # Starting FL client functions

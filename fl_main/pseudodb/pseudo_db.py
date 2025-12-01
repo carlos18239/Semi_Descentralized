@@ -30,11 +30,12 @@ class PseudoDB:
 
         # if there is no directory to save models create the dir
         self.data_path = self.config['db_data_path']
+        self.db_name = self.config['db_name']
         if not os.path.exists(self.data_path):
             os.makedirs(self.data_path)
 
         # Init DB
-        self.db_file = f'{self.data_path}/model_data{time.time()}.db'
+        self.db_file = f'{self.data_path}/{self.db_name}.db'   # ./db/sample_data.db
         self.dbhandler = SQLiteDBHandler(self.db_file)
         self.dbhandler.initialize_DB()
 

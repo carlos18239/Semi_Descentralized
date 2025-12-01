@@ -1,0 +1,63 @@
+services:
+  pseudo_db:
+    image: fl-node:py38
+    container_name: pseudo_db
+    networks:
+      - flnet
+    volumes:
+      - ./db:/app/db
+      - ./setups:/app/setups
+      - ./:/app:ro
+    command: python3 -m fl_main.pseudodb.pseudo_db
+
+  aggregator:
+    image: fl-node:py38
+    container_name: aggregator
+    networks:
+      - flnet
+    volumes:
+      - ./db:/app/db
+      - ./setups:/app/setups
+      - ./:/app:ro
+    ports:
+      - "8765:8765"    # reg_socket
+      - "4321:4321"    # recv_socket
+      - "7890:7890"    # exch_socket (if needed)
+      - "9017:9017"    # db socket (if pseudo-db is bound to this)
+    working_dir: /app
+    command: python3 -m fl_main.aggregator.server_th
+
+  agent_a2:
+    image: fl-node:py38
+    container_name: agent_a2
+    networks:
+      - flnet
+    volumes:
+      - ./:/app:ro
+      - ./setups:/app/setups
+      - ./data/agents/a2:/app/data/agents/a2
+    working_dir: /app
+    # Use lightweight agent client for testing (no heavy ML deps required)
+    # Run a supervisor that restarts the client and execs the aggregator when promoted
+    command: python3 -m fl_main.agent.role_supervisor 1 50002 a2
+
+  agent_a3:
+    image: fl-node:py38
+    container_name: agent_a3
+    networks:
+      - flnet
+    volumes:
+      - ./:/app:ro
+      - ./setups:/app/setups
+      - ./data/agents/a3:/app/data/agents/a3
+    working_dir: /app
+    # Use lightweight agent client for testing (no heavy ML deps required)
+    # Run a supervisor that restarts the client and execs the aggregator when promoted
+    command: python3 -m fl_main.agent.role_supervisor 1 50003 a3
+
+networks:
+  flnet:
+    driver: bridge
+
+# Using host bind mount for ./setups so containers see the repo configs;
+# if you prefer per-container persistent setups, change to named volumes.

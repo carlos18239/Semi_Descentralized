@@ -31,6 +31,20 @@ def read_config(config_path: str) -> Dict[str, Any]:
     return config
 
 
+def write_config(config_path: str, config: Dict[str, Any]):
+    """
+    Write a JSON configuration file atomically.
+    :param config_path: path to the JSON file
+    :param config: dict to write
+    """
+    # write to a temporary file then rename for atomicity
+    tmp = f"{config_path}.tmp"
+    with open(tmp, 'w') as jf:
+        json.dump(config, jf, indent=2)
+    import pathlib
+    pathlib.Path(tmp).replace(pathlib.Path(config_path))
+
+
 def generate_id() -> str:
     """
     Generate a system-wide unique ID based on

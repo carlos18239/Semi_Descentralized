@@ -17,7 +17,7 @@ def init_db_server(func, ip, socket):
     loop.run_until_complete(start_server)
     loop.run_forever()
 
-def init_fl_server(register, receive_msg_from_agent, model_synthesis_routine, aggr_ip, reg_socket, recv_socket):
+def init_fl_server(register, receive_msg_from_agent, model_synthesis_routine, aggr_ip, reg_socket, recv_socket, *extra_routines):
     """
     Start the FL server
     :param register: Function
@@ -33,9 +33,13 @@ def init_fl_server(register, receive_msg_from_agent, model_synthesis_routine, ag
                                     max_size=None, max_queue=None)
     start_receiver = websockets.serve(receive_msg_from_agent, aggr_ip, recv_socket,
                                       max_size=None, max_queue=None)
-    loop.run_until_complete(asyncio.gather(start_server,
-                                           start_receiver,
-                                           model_synthesis_routine))
+    # Allow passing additional coroutine routines (e.g., agent-waiter)
+    gather_items = [start_server, start_receiver, model_synthesis_routine]
+    if extra_routines:
+        for r in extra_routines:
+            gather_items.append(r)
+
+    loop.run_until_complete(asyncio.gather(*gather_items))
     loop.run_forever()
 
 def init_client_server(func, ip, socket):

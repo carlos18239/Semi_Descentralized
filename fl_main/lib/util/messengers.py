@@ -70,27 +70,60 @@ def generate_agent_participation_message(agent_name: str,
     msg.append(agent_name)  # 9
     return msg
 
-def generate_agent_participation_confirm_message(aggregator_id: str,
-                                                      model_id: str,
-                                                      models: Dict[str,np.array],
-                                                      round: int,
-                                                      agent_id: str,
-                                                      exch_socket: str,
-                                                      recv_socket: str) -> List[Any]:
-    msg = list()
-    msg.append(AggMsgType.welcome)  # 0
-    msg.append(aggregator_id)  # 1
-    msg.append(model_id)  # 2
-    msg.append(models)  # 3    
-    msg.append(round)  # 4
-    msg.append(agent_id) # 5
-    msg.append(exch_socket)  # 6
-    msg.append(recv_socket)  # 7
+def generate_rotation_message(new_aggregator_id: str,
+                              new_aggregator_ip: str,
+                              new_aggregator_reg_socket: int,
+                              model_id: str,
+                              round: int,
+                              models: Dict[str, Any],
+                              rand_scores: Dict[str,int]) -> List[Any]:
+    msg = []
+    msg.append(AggMsgType.rotation)            # 0
+    msg.append(new_aggregator_id)              # 1
+    msg.append(new_aggregator_ip)              # 2
+    msg.append(new_aggregator_reg_socket)      # 3
+    msg.append(model_id)                       # 4
+    msg.append(round)                          # 5
+    msg.append(models)                         # 6
+    msg.append(rand_scores)                    # 7
     return msg
 
 def generate_ack_message():
     msg = list()
     msg.append(AggMsgType.ack) # 0
+    return msg
+
+def generate_agent_participation_confirm_message(aggregator_id: str,
+                                                 model_id: str,
+                                                 models: Dict[str,Any],
+                                                 round: int,
+                                                 agent_id: str,
+                                                 exch_socket: str,
+                                                 recv_socket: str,
+                                                 aggregator_ip: str = "") -> List[Any]:
+    """
+    Welcome/confirm message sent by aggregator to an agent on registration.
+    Fields:
+     0: AggMsgType.welcome
+     1: aggregator_id
+     2: model_id
+     3: models (dict)
+     4: round
+     5: agent_id (assigned/confirmed id)
+     6: exch_socket (port for exchange)
+     7: recv_socket (port for polling/recv)
+     8: aggregator_ip (optional, for rotation)
+    """
+    msg = list()
+    msg.append(AggMsgType.welcome)  # 0
+    msg.append(aggregator_id)      # 1
+    msg.append(model_id)           # 2
+    msg.append(models)             # 3
+    msg.append(round)              # 4
+    msg.append(agent_id)           # 5
+    msg.append(exch_socket)        # 6
+    msg.append(recv_socket)        # 7
+    msg.append(aggregator_ip)      # 8 (optional)
     return msg
 
 def generate_polling_message(round: int, agent_id: str):

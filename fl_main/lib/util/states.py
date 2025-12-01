@@ -44,6 +44,17 @@ class AggMsgType(Enum):
     welcome = 0
     update = 1
     ack = 2
+    rotation = 3
+    
+class RotationMSGLocation(IntEnum):
+    msg_type = 0
+    new_aggregator_id = 1
+    new_aggregator_ip = 2
+    new_aggregator_reg_socket = 3
+    model_id = 4
+    round = 5
+    models = 6
+    rand_scores = 7
 
 # MSG LOCATION
 class ParticipateMSGLocation(IntEnum):
@@ -75,6 +86,7 @@ class ParticipateConfirmationMSGLocation(IntEnum):
     agent_id = 5
     exch_socket = 6
     recv_socket = 7
+    aggregator_ip = 8
 
 class DBPushMsgLocation(IntEnum):
     """
