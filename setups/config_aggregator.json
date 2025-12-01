@@ -12,6 +12,7 @@
   "role": "aggregator",
   "rotation_min_rounds": 1,
   "rotation_interval": 3,
+  "rotation_delay": 20,
   "agent_wait_interval": 10,
   "agent_ttl_seconds": 300,
   "max_rounds": 100,
