@@ -11,7 +11,7 @@ from fl_main.lib.util.helpers import set_config_file, read_config
 # client with the provided args. Otherwise it restarts the aggregator.
 
 AGG_MODULE = ['python3', '-m', 'fl_main.aggregator.server_th']
-CLIENT_MODULE = ['python3', '-m', 'fl_main.agent.client']
+CLIENT_MODULE = ['python3', '-m', 'fl_main.examples.image_classification.classification_engine']
 
 # Store client args from command line (for when we need to switch to agent)
 if len(sys.argv) >= 4:

@@ -10,7 +10,7 @@ from fl_main.lib.util.helpers import set_config_file, read_config
 # config `role` becomes 'aggregator', the supervisor will exec the aggregator
 # server (replacing itself). Otherwise it restarts the client.
 
-CLIENT_MODULE = ['python3', '-m', 'fl_main.agent.client']
+CLIENT_MODULE = ['python3', '-m', 'fl_main.examples.image_classification.classification_engine']
 AGG_MODULE = ['python3', '-m', 'fl_main.aggregator.server_th']
 
 client_args = sys.argv[1:]
