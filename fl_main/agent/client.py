@@ -335,9 +335,12 @@ class Client:
                     logging.info('Exiting to restart as aggregator...')
                     os._exit(0)
                 else:
-                    # Update local aggregator reference and continue
+                    # Update local aggregator reference
                     self.aggr_ip = winner_ip
                     self.reg_socket = str(winner_sock)
+                    logging.info(f'This agent lost rotation. Exiting to re-register with new aggregator at {winner_ip}:{winner_sock}')
+                    # Exit to restart and re-register with new aggregator
+                    os._exit(0)
                 return
             
             elif msg_type == AggMsgType.update:
