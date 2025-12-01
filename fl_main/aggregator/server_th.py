@@ -104,8 +104,6 @@ class Server:
         self.rotation_winner_id = None
         # Track which agents have received rotation (set of agent_ids)
         self.rotation_notified_agents = set()
-        # Track which agents have received global model in rotation round
-        self.agents_received_gm_in_rotation_round = set()
         # Delay before sending rotation (seconds) - give agents time to sync
         self.rotation_delay = int(self.config.get('rotation_delay', 15))
         # Aggregation timeout (seconds) - max time to wait for models
@@ -500,32 +498,24 @@ class Server:
             all_db_agents = self.dbhandler.get_all_agents()
             all_agent_ids = {aid for (aid, ip, sock) in all_db_agents}
             
-            # Safety check: if no agents in DB, something is wrong
+            # Safety check: if no agents in DB, cancel rotation
             if len(all_agent_ids) == 0:
-                logging.warning("No agents in DB during rotation check - skipping rotation")
+                logging.warning("No agents in DB during rotation - cancelling rotation")
                 self.pending_rotation_msg = None
-                self.agents_received_gm_in_rotation_round = set()
+                self.rotation_notified_agents = set()
                 return
             
-            # Check 1: Have ALL agents received the global model?
-            if not all_agent_ids.issubset(self.agents_received_gm_in_rotation_round):
-                # Not all agents have received GM yet - send GM instead of rotation
-                remaining_gm = all_agent_ids - self.agents_received_gm_in_rotation_round
-                logging.info(f'⏳ Rotation waiting: {len(remaining_gm)} agents still need global model first')
-                # Fall through to Priority 2 to send global model
-                pass  # Continue to check if this agent needs GM
+            # Send rotation message to this agent if not already notified
+            if agent_id not in self.rotation_notified_agents:
+                await send_websocket(self.pending_rotation_msg, websocket)
+                logging.info(f'🔄 Rotation message sent to {agent_id} via polling')
+                self.rotation_notified_agents.add(agent_id)
             else:
-                # All agents have received GM - now we can send rotation messages
-                if agent_id not in self.rotation_notified_agents:
-                    await send_websocket(self.pending_rotation_msg, websocket)
-                    logging.info(f'🔄 Rotation message sent to {agent_id} via polling')
-                    self.rotation_notified_agents.add(agent_id)
-                else:
-                    # Agent already got rotation, send again (idempotent)
-                    await send_websocket(self.pending_rotation_msg, websocket)
-                    logging.info(f'🔄 Rotation message re-sent to {agent_id} (already notified)')
+                # Agent already got rotation, send again (idempotent)
+                await send_websocket(self.pending_rotation_msg, websocket)
+                logging.info(f'🔄 Rotation message re-sent to {agent_id} (already notified)')
             
-            # Check 2: Have all agents been notified of rotation?
+            # Check: Have all current DB agents been notified?
             if all_agent_ids.issubset(self.rotation_notified_agents):
                 logging.info(f'All {len(all_agent_ids)} agents notified of rotation.')
                 
@@ -541,7 +531,6 @@ class Server:
                     self.pending_rotation_msg = None
                     self.rotation_winner_id = None
                     self.rotation_notified_agents = set()
-                    self.agents_received_gm_in_rotation_round = set()
                     return
                 else:
                     logging.info(f'This aggregator lost the rotation. Changing to agent role and exiting.')
@@ -584,11 +573,6 @@ class Server:
             gm_msg = generate_cluster_model_dist_message(self.sm.id, model_id, self.sm.round, cluster_models)
             await send_websocket(gm_msg, websocket)
             logging.info(f'--- Global Models Sent to {agent_id} ---')
-            
-            # If we're preparing rotation, track that this agent got the GM
-            if self.pending_rotation_msg is not None:
-                self.agents_received_gm_in_rotation_round.add(agent_id)
-                logging.info(f'Agent {agent_id} received GM in rotation round. Total: {len(self.agents_received_gm_in_rotation_round)}')
             
             # Track bytes sent for metrics
             try:
@@ -726,10 +710,11 @@ class Server:
                 if should_rotate:
                     # Broadcast rotation and choose next aggregator
                     logging.info(f"🔄 Initiating rotation at round {self.sm.round}")
-                    logging.info(f"⏳ Preparing rotation: will wait for all agents to receive global model first...")
+                    logging.info(f"⏳ Applying {self.rotation_delay}s delay before rotation activation...")
+                    await asyncio.sleep(self.rotation_delay)  # Give agents time to process current round
                     await self._choose_and_broadcast_new_aggregator()
                     self.last_rotation_round = self.sm.round
-                    logging.info(f"✅ Rotation prepared at round {self.sm.round}")
+                    logging.info(f"✅ Rotation activated at round {self.sm.round}")
 
     async def _send_cluster_models_to_all(self):
         """
@@ -824,14 +809,11 @@ class Server:
             self.pending_rotation_msg = rot_msg
             self.rotation_winner_id = winner  # Store winner ID
             self.rotation_notified_agents = set()  # Reset tracking
-            self.agents_received_gm_in_rotation_round = set()  # Track who got GM in this round
             # Get all agents from DB to wait for everyone
             all_db_agents = self.dbhandler.get_all_agents()
             num_agents_to_notify = len(all_db_agents)
             logging.info(f'🎯 Rotation prepared for polling delivery. Winner: {winner} ({winner_ip}:{winner_sock}) score {winner_score}')
-            logging.info(f'📋 Step 1: Waiting for all {num_agents_to_notify} agents to receive global model of round {self.sm.round}...')
-            logging.info(f'📋 Step 2: Then will apply {self.rotation_delay}s delay before sending rotation messages...')
-            logging.info(f'📋 Step 3: Finally will wait for all agents to poll and receive rotation...')
+            logging.info(f'📋 Will wait for all {num_agents_to_notify} agents to poll and receive rotation message...')
             # Exit will happen in _process_polling after all agents notified
             return
         else:

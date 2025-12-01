@@ -14,12 +14,18 @@ class DataManger:
     _singleton_dm = None
 
     @classmethod
-    def dm(cls, th: int = 0):
+    def dm(cls, th: int = 0, agent_id: int = 0, num_agents: int = 1):
         if not cls._singleton_dm and th > 0:
-            cls._singleton_dm = cls(th)
+            cls._singleton_dm = cls(th, agent_id, num_agents)
         return cls._singleton_dm
 
-    def __init__(self, cutoff_th: int):
+    def __init__(self, cutoff_th: int, agent_id: int = 0, num_agents: int = 1):
+        """
+        Initialize DataManager with agent-specific data partition
+        :param cutoff_th: Number of batches to train per round
+        :param agent_id: ID of this agent (0-indexed, e.g., 0, 1, 2 for 3 agents)
+        :param num_agents: Total number of agents in the federation
+        """
         transform = transforms.Compose(
             [transforms.ToTensor(),
              transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
@@ -29,6 +35,21 @@ class DataManger:
 
         testset = torchvision.datasets.CIFAR10(root='./data', train=False,
                                                download=True, transform=transform)
+        
+        # FEDERATED LEARNING: Partition data across agents (non-IID)
+        # Each agent gets a unique subset of the training data
+        if num_agents > 1:
+            total_samples = len(trainset)
+            samples_per_agent = total_samples // num_agents
+            start_idx = agent_id * samples_per_agent
+            end_idx = start_idx + samples_per_agent if agent_id < num_agents - 1 else total_samples
+            
+            # Create subset for this agent
+            indices = list(range(start_idx, end_idx))
+            trainset = torch.utils.data.Subset(trainset, indices)
+            print(f'Agent {agent_id}: Training on samples {start_idx}-{end_idx} ({len(indices)} samples)')
+        else:
+            print(f'Single agent mode: using full dataset ({len(trainset)} samples)')
 
         self.trainloader = torch.utils.data.DataLoader(trainset, batch_size=4,
                                                        shuffle=True, num_workers=2)

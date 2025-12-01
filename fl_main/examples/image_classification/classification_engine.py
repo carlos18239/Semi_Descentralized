@@ -30,6 +30,8 @@ class TrainingMetaData:
     # This will be used for the weighted averaging
     # Set to a natural number > 0
     num_training_data = 500
+    agent_name = None  # Will be set during initialization
+    num_agents = 4  # Total number of agents in the federation
 
 def init_models() -> Dict[str,np.array]:
     """
@@ -56,8 +58,20 @@ def training(models: Dict[str,np.array], init_flag: bool = False) -> Dict[str,np
     if init_flag:
         # Prepare the training data
         # num of samples / 4 = threshold for training due to the batch size
-
-        DataManger.dm(int(TrainingMetaData.num_training_data / 4))
+        # Extract agent_id from agent_name (e.g., "a1" -> 0, "a2" -> 1, etc.)
+        agent_id = 0
+        if TrainingMetaData.agent_name:
+            try:
+                # Extract number from agent name (a1, a2, a3, a4 -> 0, 1, 2, 3)
+                import re
+                match = re.search(r'\d+', TrainingMetaData.agent_name)
+                if match:
+                    agent_id = int(match.group()) - 1  # Convert to 0-indexed
+                    logging.info(f'Agent name: {TrainingMetaData.agent_name} -> agent_id: {agent_id}')
+            except Exception as e:
+                logging.warning(f'Could not extract agent_id from {TrainingMetaData.agent_name}: {e}')
+        
+        DataManger.dm(int(TrainingMetaData.num_training_data / 4), agent_id, TrainingMetaData.num_agents)
         return init_models()
 
     # Do ML Training
@@ -134,6 +148,10 @@ if __name__ == '__main__':
 
     fl_client = Client()
     logging.info(f'--- Your IP is {fl_client.agent_ip} ---')
+    
+    # Store agent name for data partitioning
+    TrainingMetaData.agent_name = fl_client.agent_name
+    logging.info(f'--- Agent name: {TrainingMetaData.agent_name} ---')
     
     # Initialize metrics logger with agent name
     metrics_logger = MetricsLogger(log_dir="./metrics", agent_name=fl_client.agent_name)
