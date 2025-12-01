@@ -108,6 +108,9 @@ class Server:
         self.agents_received_gm_in_rotation_round = set()
         # Delay before sending rotation (seconds) - give agents time to sync
         self.rotation_delay = int(self.config.get('rotation_delay', 15))
+        # Aggregation timeout (seconds) - max time to wait for models
+        self.aggregation_timeout = int(self.config.get('aggregation_timeout', 120))
+        self.aggregation_start_time = None
         
         # Termination judges
         self.max_rounds = int(self.config.get('max_rounds', 100))
@@ -138,6 +141,13 @@ class Server:
         # that waits for agents to become reachable.
         self._load_agents_from_db()
         self.db_agents = []
+        
+        # Register this aggregator in DB so agents can discover it
+        try:
+            self.dbhandler.update_current_aggregator(self.sm.id, self.aggr_ip, self.reg_socket)
+            logging.info(f"✅ Aggregator registered in DB: {self.aggr_ip}:{self.reg_socket}")
+        except Exception as e:
+            logging.error(f"Failed to register aggregator in DB: {e}")
 
     def _init_round_from_db(self):
         try:
@@ -600,8 +610,69 @@ class Server:
         while True:
             # Periodic check (frequency is specified in the JSON config file)
             await asyncio.sleep(self.round_interval)
+            
+            # --- ROBUST RECONNECTION: Sync agent_set with DB before aggregation ---
+            # This ensures agent_set reflects only currently alive agents (not stale)
+            try:
+                db_agents = self.dbhandler.get_all_agents()
+                if db_agents:
+                    # Rebuild agent_set from DB
+                    synced_agent_set = []
+                    for agent_id, agent_ip, agent_socket in db_agents:
+                        # Try to match with existing agent in agent_set to preserve agent_name
+                        agent_name = None
+                        for existing_agent in self.sm.agent_set:
+                            if existing_agent['agent_id'] == agent_id:
+                                agent_name = existing_agent['agent_name']
+                                break
+                        if not agent_name:
+                            agent_name = f"agent_{agent_id[:8]}"
+                        
+                        synced_agent_set.append({
+                            'agent_name': agent_name,
+                            'agent_id': agent_id,
+                            'agent_ip': agent_ip,
+                            'socket': agent_socket
+                        })
+                    
+                    if len(synced_agent_set) != len(self.sm.agent_set):
+                        logging.info(f"🔄 Agent_set synced with DB: {len(self.sm.agent_set)} -> {len(synced_agent_set)} agents")
+                    self.sm.agent_set = synced_agent_set
+                else:
+                    logging.warning("No agents in DB during sync - clearing agent_set")
+                    self.sm.agent_set = []
+            except Exception as e:
+                logging.error(f"Failed to sync agent_set with DB: {e}")
 
-            if self.sm.ready_for_local_aggregation():  # if it has enough models to aggregate
+            # Check if we're waiting for models and track timeout
+            if not self.sm.ready_for_local_aggregation():
+                if self.aggregation_start_time is None:
+                    # First time waiting for models in this round
+                    self.aggregation_start_time = time.time()
+                else:
+                    # Check if timeout exceeded
+                    waiting_time = time.time() - self.aggregation_start_time
+                    if waiting_time > self.aggregation_timeout:
+                        num_models = len(self.sm.local_models_buffer) if hasattr(self.sm, 'local_models_buffer') else 0
+                        logging.warning(f"⏱️ Aggregation timeout ({self.aggregation_timeout}s exceeded)")
+                        logging.warning(f"⏱️ Waited {waiting_time:.1f}s with {num_models} models - proceeding with partial aggregation")
+                        # Reset timeout for next round
+                        self.aggregation_start_time = None
+                        # Force aggregation with available models if we have at least 1
+                        if num_models > 0:
+                            # Continue to aggregation below
+                            pass
+                        else:
+                            logging.warning("⏱️ No models available - skipping aggregation this cycle")
+                            continue
+                    else:
+                        # Still waiting, not timed out yet
+                        continue
+            else:
+                # Ready for aggregation - reset timeout tracker
+                self.aggregation_start_time = None
+
+            if self.sm.ready_for_local_aggregation() or (self.aggregation_start_time is None and len(self.sm.local_models_buffer) > 0):  # if it has enough models to aggregate or timeout forced it
                 logging.info(f'Round {self.sm.round}')
                 logging.info(f'Current agents: {self.sm.agent_set}')
 
@@ -740,6 +811,13 @@ class Server:
         model_id = self.sm.cluster_model_ids[-1] if self.sm.cluster_model_ids else ''
         models = convert_LDict_to_Dict(self.sm.cluster_models)
         rot_msg = generate_rotation_message(winner, winner_ip, winner_sock, model_id, self.sm.round, models, scores)
+        
+        # Register new aggregator in DB for agent discovery
+        try:
+            self.dbhandler.update_current_aggregator(winner, winner_ip, winner_sock)
+            logging.info(f"✅ Updated DB with new aggregator: {winner_ip}:{winner_sock}")
+        except Exception as e:
+            logging.error(f"Failed to update aggregator in DB: {e}")
 
         # In polling mode, store rotation message for delivery via next poll
         if self.is_polling:

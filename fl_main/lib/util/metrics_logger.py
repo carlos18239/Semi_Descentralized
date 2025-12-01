@@ -29,13 +29,15 @@ class MetricsLogger:
         self.log_dir.mkdir(parents=True, exist_ok=True)
         
         # CSV filename - FIXED name (no timestamp) for continuous updates
-        self.csv_file = self.log_dir / f"metrics_aggregator.csv"
+        self.csv_file = self.log_dir / f"metrics_{agent_name}.csv"
         # CSV headers
         self.headers = [
             'timestamp',
             'round',
             'global_accuracy',
             'local_accuracy',
+            'global_recall',
+            'local_recall',
             'num_messages',
             'bytes_global',
             'bytes_local',
@@ -70,6 +72,8 @@ class MetricsLogger:
                   round_num,
                   global_accuracy=None,
                   local_accuracy=None,
+                  global_recall=None,
+                  local_recall=None,
                   num_messages=0,
                   bytes_global=0,
                   bytes_local=0,
@@ -80,6 +84,8 @@ class MetricsLogger:
         :param round_num: Round number
         :param global_accuracy: Accuracy of global model (0-1)
         :param local_accuracy: Accuracy of local model (0-1)
+        :param global_recall: Recall of global model (0-1)
+        :param local_recall: Recall of local model (0-1)
         :param num_messages: Number of messages sent/received
         :param bytes_global: Bytes received for global model
         :param bytes_local: Bytes sent for local model
@@ -100,6 +106,8 @@ class MetricsLogger:
             'round': round_num,
             'global_accuracy': f"{global_accuracy:.6f}" if global_accuracy is not None else '',
             'local_accuracy': f"{local_accuracy:.6f}" if local_accuracy is not None else '',
+            'global_recall': f"{global_recall:.6f}" if global_recall is not None else '',
+            'local_recall': f"{local_recall:.6f}" if local_recall is not None else '',
             'num_messages': num_messages,
             'bytes_global': bytes_global,
             'bytes_local': bytes_local,
@@ -146,8 +154,8 @@ class AggregatorMetricsLogger:
         self.log_dir = Path(log_dir)
         self.log_dir.mkdir(parents=True, exist_ok=True)
         
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        self.csv_file = self.log_dir / f"metrics_aggregator_{timestamp}.csv"
+        # Fixed filename (no timestamp) for continuous updates
+        self.csv_file = self.log_dir / "metrics_aggregator.csv"
         
         self.headers = [
             'timestamp',

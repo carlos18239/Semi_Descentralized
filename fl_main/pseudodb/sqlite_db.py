@@ -38,6 +38,13 @@ class SQLiteDBHandler:
                         ip TEXT,
                         socket INTEGER,
                         last_seen TEXT)''')
+        
+        c.execute('''CREATE TABLE IF NOT EXISTS current_aggregator(
+                        id INTEGER PRIMARY KEY CHECK (id = 1),
+                        aggregator_id TEXT,
+                        ip TEXT,
+                        socket INTEGER,
+                        updated_at TEXT)''')
 
         conn.commit()
         conn.close()
@@ -198,4 +205,49 @@ class SQLiteDBHandler:
                 conn.close()
             except:
                 pass
+    
+    def update_current_aggregator(self, aggregator_id: str, ip: str, socket: int):
+        """
+        Update the current active aggregator in DB (for agent discovery after rotation)
+        :param aggregator_id: ID of the current aggregator
+        :param ip: IP address of the aggregator
+        :param socket: Port number of the aggregator
+        """
+        conn = sqlite3.connect(self.db_file)
+        c = conn.cursor()
+        
+        now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        try:
+            # Use INSERT OR REPLACE to ensure only one row exists
+            c.execute('''INSERT OR REPLACE INTO current_aggregator (id, aggregator_id, ip, socket, updated_at)
+                         VALUES (1, ?, ?, ?, ?)''', (aggregator_id, ip, socket, now))
+            conn.commit()
+            logging.info(f"Updated current aggregator: {aggregator_id} at {ip}:{socket}")
+        except Exception as e:
+            logging.error(f"Error updating current aggregator: {e}")
+        finally:
+            conn.close()
+    
+    def get_current_aggregator(self):
+        """
+        Get the current active aggregator from DB
+        :return: tuple (aggregator_id, ip, socket) or None if not found
+        """
+        conn = sqlite3.connect(self.db_file)
+        c = conn.cursor()
+        
+        try:
+            c.execute('SELECT aggregator_id, ip, socket FROM current_aggregator WHERE id = 1')
+            row = c.fetchone()
+            conn.close()
+            
+            if row:
+                return row  # (aggregator_id, ip, socket)
+            else:
+                return None
+        except Exception as e:
+            logging.error(f"Error getting current aggregator: {e}")
+            conn.close()
+            return None
 

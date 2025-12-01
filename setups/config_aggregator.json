@@ -14,7 +14,8 @@
   "rotation_interval": 3,
   "rotation_delay": 20,
   "agent_wait_interval": 10,
-  "agent_ttl_seconds": 300,
+  "agent_ttl_seconds": 600,
+  "aggregation_timeout": 120,
   "max_rounds": 100,
   "early_stopping_patience": 120,
   "early_stopping_min_delta": 0.0001

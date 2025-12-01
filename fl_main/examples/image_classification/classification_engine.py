@@ -135,9 +135,8 @@ if __name__ == '__main__':
     fl_client = Client()
     logging.info(f'--- Your IP is {fl_client.agent_ip} ---')
     
-    # Initialize metrics logger
-    agent_name = getattr(fl_client, 'name', fl_client.id[:8])  # Use short ID if no name
-    metrics_logger = MetricsLogger(log_dir="./metrics", agent_name=agent_name)
+    # Initialize metrics logger with agent name
+    metrics_logger = MetricsLogger(log_dir="./metrics", agent_name=fl_client.agent_name)
     logging.info(f'📊 Metrics CSV: {metrics_logger.get_csv_path()}')
 
     # Create a set of template models (to tell the shapes)
@@ -199,6 +198,8 @@ if __name__ == '__main__':
             round_num=training_count,
             global_accuracy=global_model_performance_data,
             local_accuracy=accuracy,
+            global_recall=global_model_performance_data,  # Using accuracy as recall
+            local_recall=accuracy,  # Using accuracy as recall
             num_messages=num_messages_round,
             bytes_global=bytes_global,
             bytes_local=bytes_local,

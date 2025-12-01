@@ -68,35 +68,37 @@ def execute_ic_training(dm, net, criterion, optimizer):
     :return:
     """
     # To simulate the scenarios where each agent has less number of data
-    # it exists from training after iterating till the cutoff threshold
-    random_indices = random.sample(range(0, len(dm.trainloader)), dm.cutoff_threshold)
-
+    # train on first N batches up to cutoff threshold (consecutive, not random)
     for epoch in range(1):
         running_loss = 0.0
-        j = 0
+        num_trained_batches = 0
+        
         for i, data in enumerate(dm.trainloader):
-            if i in random_indices:
-                j += 1
+            # Stop after reaching cutoff threshold
+            if num_trained_batches >= dm.cutoff_threshold:
+                break
+            
+            # get the inputs; data is a list of [inputs, labels]
+            inputs, labels = data
 
-                # get the inputs; data is a list of [inputs, labels]
-                inputs, labels = data
+            # zero the parameter gradients
+            optimizer.zero_grad()
 
-                # zero the parameter gradients
-                optimizer.zero_grad()
+            # forward + backward + optimize
+            outputs = net(inputs)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
 
-                # forward + backward + optimize
-                outputs = net(inputs)
-                loss = criterion(outputs, labels)
-                loss.backward()
-                optimizer.step()
+            # print statistics
+            running_loss += loss.item()
+            num_trained_batches += 1
+            
+            if num_trained_batches % 100 == 0:  # print every 100 mini-batches
+                avg_loss = running_loss / num_trained_batches
+                print(f'[Epoch {epoch + 1}, Batch {num_trained_batches}] avg loss: {avg_loss:.3f}')
 
-                # print statistics
-                running_loss += loss.item()
-                if j % 1000 == 999:  # print every 1000 mini-batches
-                    print('[%d, %5d] loss: %.3f' %
-                          (epoch + 1, j + 1, running_loss / 1000))
-                    running_loss = 0.0
-
+    print(f'Training completed: {num_trained_batches} batches trained')
     return net
 
 
