@@ -1,5 +1,8 @@
 import logging
 from typing import Dict
+import time
+import sys
+import pickle
 
 import numpy as np
 import torch
@@ -12,6 +15,7 @@ from .ic_training import DataManger, execute_ic_training
 
 from fl_main.agent.client import Client
 from fl_main.lib.util.helpers import set_config_file, read_config
+from fl_main.lib.util.metrics_logger import MetricsLogger
 import subprocess, sys
 
 cfg = read_config(set_config_file('agent'))
@@ -130,6 +134,11 @@ if __name__ == '__main__':
 
     fl_client = Client()
     logging.info(f'--- Your IP is {fl_client.agent_ip} ---')
+    
+    # Initialize metrics logger
+    agent_name = getattr(fl_client, 'name', fl_client.id[:8])  # Use short ID if no name
+    metrics_logger = MetricsLogger(log_dir="./metrics", agent_name=agent_name)
+    logging.info(f'📊 Metrics CSV: {metrics_logger.get_csv_path()}')
 
     # Create a set of template models (to tell the shapes)
     initial_models = training(dict(), init_flag=True)
@@ -142,11 +151,25 @@ if __name__ == '__main__':
 
     training_count = 0
     gm_arrival_count = 0
+    
+    # Timing and metrics tracking
+    wait_start_time = None
+    num_messages_round = 0
+    
     while judge_termination(training_count, gm_arrival_count):
+        # Start round timer
+        metrics_logger.start_round()
+        wait_start_time = time.time()
+        num_messages_round = 0  # Reset message counter
 
         # Wait for Global models (base models)
         global_models = fl_client.wait_for_global_model()
+        latency_wait_global = time.time() - wait_start_time
         gm_arrival_count += 1
+        num_messages_round += 1  # Received global model message
+
+        # Calculate bytes for global model
+        bytes_global = len(pickle.dumps(global_models))
 
         # Global Model evaluation (id, accuracy)
         global_model_performance_data = compute_performance(global_models, prep_test_data(), False)
@@ -159,9 +182,25 @@ if __name__ == '__main__':
         # Local Model evaluation (id, accuracy)
         accuracy = compute_performance(models, prep_test_data(), True)
         
+        # Calculate bytes for local model
+        bytes_local = len(pickle.dumps(models))
+        
         # Send trained model with metadata
         fl_client.send_trained_model(models, int(TrainingMetaData.num_training_data), accuracy)
+        num_messages_round += 1  # Sent local model message
         
         # Send recall metric to aggregator for early stopping judge
         # Using accuracy as recall (you can change to actual recall if needed)
         fl_client.send_recall_metric(accuracy)
+        num_messages_round += 1  # Sent recall message
+        
+        # Log metrics for this round
+        metrics_logger.log_round(
+            round_num=training_count,
+            global_accuracy=global_model_performance_data,
+            local_accuracy=accuracy,
+            num_messages=num_messages_round,
+            bytes_global=bytes_global,
+            bytes_local=bytes_local,
+            latency_wait_global=latency_wait_global
+        )

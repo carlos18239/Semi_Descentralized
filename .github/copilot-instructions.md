@@ -52,7 +52,7 @@ Important files to reference when changing functionality
 Testing and debugging tips specific to this repo
 - When `communication_handler.send()` returns `None`, it means either there was no response or the connection failed — code frequently treats `None` as "no reply"; when debugging network issues, enable DEBUG logs and confirm socket/port values in `setups/config_*.json`.
 - To simulate multiple agents on one machine, run multiple `examples.minimal.minimal_MLEngine` with different `gm_recv_port` and `agent_name` arguments.
-- Rotation behavior: controlled by `rotation_min_rounds` (default 2) and `rotation_interval` (default 3) in `config_aggregator.json`. Aggregator waits until round >= `rotation_min_rounds`, then rotates every `rotation_interval` rounds. This ensures agents have time to train with aggregated models before rotation occurs. After rotation, all agents `os._exit(0)` and supervisors restart appropriate processes based on `role` field.
+- Rotation behavior: controlled by `rotation_min_rounds` (default 1) and `rotation_interval` (default 3) in `config_aggregator.json`. Aggregator waits until round >= `rotation_min_rounds`, then rotates every `rotation_interval` rounds. With default values, rotation occurs at rounds 1, 4, 7, 10, etc. After rotation, all agents `os._exit(0)` and supervisors restart appropriate processes based on `role` field.
 - **Termination judges**: Two termination conditions (configured in `config_aggregator.json`):
   1. **Juez 1 (Early Stopping)**: Training terminates if global recall doesn't improve for `early_stopping_patience` rounds (default 120). Improvement threshold is `early_stopping_min_delta` (default 0.0001).
   2. **Juez 2 (Max Rounds)**: Training terminates if `max_rounds` is reached (default 100).

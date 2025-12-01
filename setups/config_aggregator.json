@@ -10,7 +10,7 @@
   "aggregation_threshold": 1,
   "polling": 1,
   "role": "aggregator",
-  "rotation_min_rounds": 2,
+  "rotation_min_rounds": 1,
   "rotation_interval": 3,
   "agent_wait_interval": 10,
   "agent_ttl_seconds": 300,

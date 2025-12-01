@@ -10,6 +10,7 @@ from fl_main.lib.util.messengers import generate_rotation_message, generate_db_p
      generate_cluster_model_dist_message, generate_agent_participation_confirm_message
 from fl_main.lib.util.states import ParticipateMSGLocation, RotationMSGLocation, ModelUpMSGLocation, PollingMSGLocation, \
      ModelType, AgentMsgType
+from fl_main.lib.util.metrics_logger import AggregatorMetricsLogger
 from fl_main.pseudodb.sqlite_db import SQLiteDBHandler
 from .state_manager import StateManager
 from .aggregation import Aggregator
@@ -92,7 +93,7 @@ class Server:
         # TTL (in seconds) to consider DB agent entries stale and eligible for cleanup
         self.agent_ttl_seconds = int(self.config.get('agent_ttl_seconds', 300))
         # Rotation control: minimum rounds before allowing rotation
-        self.rotation_min_rounds = int(self.config.get('rotation_min_rounds', 2))
+        self.rotation_min_rounds = int(self.config.get('rotation_min_rounds', 1))
         # Rotation control: rounds between rotations
         self.rotation_interval = int(self.config.get('rotation_interval', 3))
         # Last round when rotation occurred
@@ -115,6 +116,16 @@ class Server:
         self.training_terminated = False
         self.termination_reason = None
         self.pending_termination_msg = None
+        
+        # Initialize metrics logger for aggregator
+        self.metrics_logger = AggregatorMetricsLogger(log_dir="./metrics")
+        logging.info(f'📊 Aggregator Metrics CSV: {self.metrics_logger.get_csv_path()}')
+        
+        # Metrics tracking for current round
+        self.round_bytes_received = 0
+        self.round_bytes_sent = 0
+        self.round_models_received = 0
+        self.aggregation_start_time = None
         
         self._init_round_from_db()
         # Load agent entries from DB into a pending list. Actual connection
@@ -308,6 +319,13 @@ class Server:
             self.sm.round, agent_id, exch_socket, self.recv_socket, self.aggr_ip)
         await send_websocket(reply, websocket)
         logging.info(f'--- Global Models Sent to {agent_id} ---')
+        
+        # Track bytes sent for metrics
+        try:
+            msg_bytes = len(pickle.dumps(reply))
+            self.round_bytes_sent += msg_bytes
+        except Exception as e:
+            logging.warning(f"Could not calculate message bytes: {e}")
 
     async def receive_msg_from_agent(self, websocket, path):
         """
@@ -342,6 +360,14 @@ class Server:
 
         logging.info('--- Local Model Received ---')
         logging.debug(f'Local models: {lmodels}')
+        
+        # Track bytes received for metrics
+        try:
+            model_bytes = len(pickle.dumps(lmodels))
+            self.round_bytes_received += model_bytes
+            self.round_models_received += 1
+        except Exception as e:
+            logging.warning(f"Could not calculate model bytes: {e}")
 
         # Debug: log model keys and buffer state before/after
         try:
@@ -519,6 +545,13 @@ class Server:
             gm_msg = generate_cluster_model_dist_message(self.sm.id, model_id, self.sm.round, cluster_models)
             await send_websocket(gm_msg, websocket)
             logging.info(f'--- Global Models Sent to {agent_id} ---')
+            
+            # Track bytes sent for metrics
+            try:
+                msg_bytes = len(pickle.dumps(gm_msg))
+                self.round_bytes_sent += msg_bytes
+            except Exception as e:
+                logging.warning(f"Could not calculate message bytes: {e}")
         else:
             logging.info(f'--- Polling: Global model is not ready yet ---')
             ack_msg = generate_ack_message()
@@ -538,10 +571,15 @@ class Server:
                 logging.info(f'Round {self.sm.round}')
                 logging.info(f'Current agents: {self.sm.agent_set}')
 
+                # Mark aggregation start time for metrics
+                aggregation_start = time.time()
+
                 # --- Local aggregation process --- #
                 # Local models --> An cluster model #
                 # Create a cluster model from local models
                 self.agg.aggregate_local_models()
+                
+                aggregation_time = time.time() - aggregation_start
 
                 # Push cluster model to DB
                 await self._push_cluster_models()
@@ -552,6 +590,24 @@ class Server:
 
                 # increment the aggregation round number
                 self.sm.increment_round()
+                
+                # Log aggregator metrics for this round
+                self.metrics_logger.log_round(
+                    round_num=self.sm.round,
+                    num_agents=len(self.sm.agent_set),
+                    global_recall=self.best_global_recall if self.best_global_recall > 0 else None,
+                    aggregation_time=aggregation_time,
+                    models_received=self.round_models_received,
+                    bytes_received=self.round_bytes_received,
+                    bytes_sent=self.round_bytes_sent,
+                    rounds_without_improvement=self.rounds_without_improvement,
+                    best_recall=self.best_global_recall if self.best_global_recall > 0 else None
+                )
+                
+                # Reset round metrics
+                self.round_bytes_received = 0
+                self.round_bytes_sent = 0
+                self.round_models_received = 0
                 
                 # Check if rotation should occur AFTER incrementing round
                 # This ensures agents receive and train with the current round's model
