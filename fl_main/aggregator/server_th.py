@@ -349,7 +349,7 @@ class Server:
             self.rotation_notified_agents.add(agent_id)
             
             # Check if all active agents have been notified
-            active_agent_ids = {a['agent_id'] for a in self.sm.agents}
+            active_agent_ids = {a['agent_id'] for a in self.sm.agent_set}
             if active_agent_ids.issubset(self.rotation_notified_agents):
                 logging.info(f'All {len(active_agent_ids)} agents notified of rotation. Exiting to yield role.')
                 # Persist config changes before exiting
@@ -516,7 +516,7 @@ class Server:
             self.pending_rotation_msg = rot_msg
             self.rotation_notified_agents = set()  # Reset tracking
             logging.info(f'Rotation prepared for polling delivery. Winner: {winner} ({winner_ip}:{winner_sock}) score {winner_score}')
-            logging.info(f'Waiting for all {len(self.sm.agents)} agents to poll and receive rotation...')
+            logging.info(f'Waiting for all {len(self.sm.agent_set)} agents to poll and receive rotation...')
             # Exit will happen in _process_polling after all agents notified
             return
         else:
