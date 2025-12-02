@@ -46,6 +46,25 @@ class SQLiteDBHandler:
                         ip TEXT,
                         socket INTEGER,
                         updated_at TEXT)''')
+        
+        # Tabla de barrera de sincronización distribuida
+        c.execute('''CREATE TABLE IF NOT EXISTS round_barrier(
+                        id INTEGER PRIMARY KEY CHECK (id = 1),
+                        current_round INTEGER DEFAULT 0,
+                        state TEXT DEFAULT 'registration',
+                        barrier_threshold INTEGER DEFAULT 4,
+                        agents_ready TEXT DEFAULT '[]',
+                        models_received INTEGER DEFAULT 0,
+                        aggregator_id TEXT,
+                        last_update TEXT)''')
+        
+        # Estado individual de cada agente en la ronda actual
+        c.execute('''CREATE TABLE IF NOT EXISTS agent_round_status(
+                        agent_id TEXT PRIMARY KEY,
+                        current_round INTEGER DEFAULT 0,
+                        status TEXT DEFAULT 'idle',
+                        phase TEXT DEFAULT 'registration',
+                        last_heartbeat TEXT)''')
 
         conn.commit()
         conn.close()
@@ -283,6 +302,162 @@ class SQLiteDBHandler:
             logging.info("Cleared current aggregator from DB")
         except Exception as e:
             logging.error(f"Error clearing current aggregator: {e}")
+        finally:
+            conn.close()
+    
+    # ==================== BARRERAS DISTRIBUIDAS ====================
+    
+    def init_round_barrier(self, round_num: int, threshold: int, aggregator_id: str, state: str = 'registration'):
+        """
+        Inicializa la barrera para una nueva ronda
+        """
+        conn = sqlite3.connect(self.db_file)
+        c = conn.cursor()
+        now = datetime.datetime.utcnow().isoformat()
+        
+        try:
+            c.execute('''INSERT OR REPLACE INTO round_barrier 
+                         (id, current_round, state, barrier_threshold, agents_ready, models_received, aggregator_id, last_update)
+                         VALUES (1, ?, ?, ?, '[]', 0, ?, ?)''',
+                      (round_num, state, threshold, aggregator_id, now))
+            conn.commit()
+            logging.info(f"🚦 Barrera inicializada: round={round_num}, threshold={threshold}, state={state}")
+        except Exception as e:
+            logging.error(f"Error inicializando barrera: {e}")
+        finally:
+            conn.close()
+    
+    def update_barrier_state(self, state: str):
+        """
+        Actualiza el estado de la barrera actual
+        """
+        conn = sqlite3.connect(self.db_file)
+        c = conn.cursor()
+        now = datetime.datetime.utcnow().isoformat()
+        
+        try:
+            c.execute('UPDATE round_barrier SET state = ?, last_update = ? WHERE id = 1',
+                      (state, now))
+            conn.commit()
+        except Exception as e:
+            logging.error(f"Error actualizando estado de barrera: {e}")
+        finally:
+            conn.close()
+    
+    def notify_agent_barrier_arrival(self, agent_id: str, round_num: int, phase: str):
+        """
+        Notifica que un agente llegó a una barrera específica
+        """
+        conn = sqlite3.connect(self.db_file)
+        c = conn.cursor()
+        now = datetime.datetime.utcnow().isoformat()
+        
+        try:
+            import json
+            
+            # Actualizar estado del agente
+            c.execute('''INSERT OR REPLACE INTO agent_round_status
+                         (agent_id, current_round, status, phase, last_heartbeat)
+                         VALUES (?, ?, 'ready', ?, ?)''',
+                      (agent_id, round_num, phase, now))
+            
+            # Agregar a lista de agentes listos en la barrera
+            c.execute('SELECT agents_ready FROM round_barrier WHERE id = 1')
+            row = c.fetchone()
+            if row:
+                agents_ready = json.loads(row[0])
+                if agent_id not in agents_ready:
+                    agents_ready.append(agent_id)
+                    c.execute('UPDATE round_barrier SET agents_ready = ?, last_update = ? WHERE id = 1',
+                              (json.dumps(agents_ready), now))
+            
+            conn.commit()
+        except Exception as e:
+            logging.error(f"Error notificando llegada a barrera: {e}")
+        finally:
+            conn.close()
+    
+    def get_barrier_status(self):
+        """
+        Obtiene el estado actual de la barrera
+        :return: dict con {round, state, threshold, ready_count, all_ready}
+        """
+        conn = sqlite3.connect(self.db_file)
+        c = conn.cursor()
+        
+        try:
+            import json
+            c.execute('SELECT current_round, state, barrier_threshold, agents_ready, models_received FROM round_barrier WHERE id = 1')
+            row = c.fetchone()
+            
+            if not row:
+                return {'round': 0, 'state': 'idle', 'threshold': 0, 'ready_count': 0, 'all_ready': False}
+            
+            current_round, state, threshold, agents_ready_json, models_received = row
+            agents_ready = json.loads(agents_ready_json)
+            ready_count = len(agents_ready)
+            
+            return {
+                'round': current_round,
+                'state': state,
+                'threshold': threshold,
+                'ready_count': ready_count,
+                'ready_agents': agents_ready,
+                'models_received': models_received,
+                'all_ready': ready_count >= threshold
+            }
+        except Exception as e:
+            logging.error(f"Error obteniendo estado de barrera: {e}")
+            return {'round': 0, 'state': 'error', 'threshold': 0, 'ready_count': 0, 'all_ready': False}
+        finally:
+            conn.close()
+    
+    def reset_barrier_agents(self):
+        """
+        Reinicia la lista de agentes listos en la barrera
+        """
+        conn = sqlite3.connect(self.db_file)
+        c = conn.cursor()
+        now = datetime.datetime.utcnow().isoformat()
+        
+        try:
+            c.execute('UPDATE round_barrier SET agents_ready = "[]", last_update = ? WHERE id = 1', (now,))
+            conn.commit()
+        except Exception as e:
+            logging.error(f"Error reseteando barrera: {e}")
+        finally:
+            conn.close()
+    
+    def increment_models_received(self):
+        """
+        Incrementa el contador de modelos recibidos en la barrera
+        """
+        conn = sqlite3.connect(self.db_file)
+        c = conn.cursor()
+        now = datetime.datetime.utcnow().isoformat()
+        
+        try:
+            c.execute('UPDATE round_barrier SET models_received = models_received + 1, last_update = ? WHERE id = 1', (now,))
+            conn.commit()
+        except Exception as e:
+            logging.error(f"Error incrementando modelos recibidos: {e}")
+        finally:
+            conn.close()
+    
+    def get_agents_count(self):
+        """
+        Obtiene el número de agentes registrados
+        """
+        conn = sqlite3.connect(self.db_file)
+        c = conn.cursor()
+        
+        try:
+            c.execute('SELECT COUNT(*) FROM agents')
+            count = c.fetchone()[0]
+            return count
+        except Exception as e:
+            logging.error(f"Error contando agentes: {e}")
+            return 0
         finally:
             conn.close()
 

@@ -9,7 +9,7 @@ from fl_main.lib.util.helpers import read_config, set_config_file, write_config,
 from fl_main.lib.util.messengers import generate_rotation_message, generate_db_push_message, generate_ack_message, \
      generate_cluster_model_dist_message, generate_agent_participation_confirm_message
 from fl_main.lib.util.states import ParticipateMSGLocation, RotationMSGLocation, ModelUpMSGLocation, PollingMSGLocation, \
-     ModelType, AgentMsgType
+     ModelType, AgentMsgType, DBMsgType
 from fl_main.lib.util.metrics_logger import AggregatorMetricsLogger
 # Removed SQLiteDBHandler - aggregator uses in-memory state only, PseudoDB handles persistence
 from .state_manager import StateManager
@@ -73,8 +73,8 @@ class Server:
         self.agent_ttl_seconds = int(self.config.get('agent_ttl_seconds', 300))
         # Rotation control: minimum rounds before allowing rotation
         self.rotation_min_rounds = int(self.config.get('rotation_min_rounds', 1))
-        # Rotation control: rounds between rotations
-        self.rotation_interval = int(self.config.get('rotation_interval', 3))
+        # Rotation control: rounds between rotations (default 10 rounds)
+        self.rotation_interval = int(self.config.get('rotation_interval', 10))
         # Last round when rotation occurred
         self.last_rotation_round = 0
         # Pending rotation message (for polling mode)
@@ -465,115 +465,178 @@ class Server:
 
     async def model_synthesis_routine(self):
         """
-        Periodically check the number of stored models and
-         execute synthesis if there are enough based on the agreed threshold
-        :return:
+        Rutina de agregación con BARRERAS DISTRIBUIDAS para sincronización perfecta
         """
         while True:
-            # Periodic check (frequency is specified in the JSON config file)
             await asyncio.sleep(self.round_interval)
             
-            # Agent registration happens via register() method
-            # No need to sync with DB - agents in memory are authoritative
-
-            # Check if we're waiting for models and track timeout
-            if not self.sm.ready_for_local_aggregation():
-                if self.aggregation_start_time is None:
-                    # First time waiting for models in this round
-                    self.aggregation_start_time = time.time()
-                    num_registered = len(self.sm.agent_set)
-                    logging.info(f'⏳ Esperando modelos de {num_registered} agentes...')
-                    logging.info(f'⏱️  Timeout máximo: {self.aggregation_timeout}s (2 minutos)')
-                else:
-                    # Check if timeout exceeded
-                    waiting_time = time.time() - self.aggregation_start_time
-                    if waiting_time > self.aggregation_timeout:
-                        num_models = len(self.sm.local_model_buffers[self.sm.mnames[0]]) if len(self.sm.mnames) > 0 else 0
-                        num_expected = len(self.sm.agent_set)
-                        logging.warning(f"⏱️  ¡TIMEOUT! Límite de {self.aggregation_timeout}s excedido")
-                        logging.warning(f"⏱️  Esperado: {num_expected} modelos | Recibido: {num_models} modelos")
-                        logging.warning(f"⏱️  Tiempo total de espera: {waiting_time:.1f}s")
-                        logging.warning(f"⚠️  Procediendo con AGREGACIÓN PARCIAL (algunos nodos no respondieron)")
-                        # Reset timeout for next round
-                        self.aggregation_start_time = None
-                        # Force aggregation with available models if we have at least 1
-                        if num_models > 0:
-                            # Continue to aggregation below
-                            pass
-                        else:
-                            logging.error("❌ No hay modelos disponibles - omitiendo agregación este ciclo")
-                            continue
-                    else:
-                        # Still waiting, log progress every 30 seconds
-                        if int(waiting_time) % 30 == 0 and waiting_time > 0:
-                            num_models = len(self.sm.local_model_buffers[self.sm.mnames[0]]) if len(self.sm.mnames) > 0 else 0
-                            num_expected = len(self.sm.agent_set)
-                            remaining = self.aggregation_timeout - waiting_time
-                            logging.info(f'⏱️  [{int(waiting_time)}s] Modelos: {num_models}/{num_expected} (quedan {int(remaining)}s)')
-                        continue
+            num_agents = len(self.sm.agent_set)
+            
+            # BARRERA 1: Inicializar barrera de ronda en DB
+            if num_agents == 0:
+                if int(time.time()) % 30 == 0:  # Log cada 30s
+                    logging.info("⏳ Esperando que agentes se registren...")
+                continue
+            
+            # Inicializar barrera en DB para esta ronda
+            await self._init_db_barrier(self.sm.round, num_agents, 'waiting_models')
+            logging.info(f"🚦 BARRERA 1: Esperando {num_agents} modelos (round {self.sm.round})")
+            
+            # BARRERA 2: Esperar modelos con timeout
+            models_ready = await self._wait_for_models_barrier(num_agents)
+            
+            if not models_ready:
+                logging.error("❌ Timeout esperando modelos - saltando esta ronda")
+                await self._reset_db_barrier()
+                continue
+            
+            # FASE AGREGACIÓN: Solo el agregador ejecuta
+            logging.info(f"⚙️  AGREGANDO: Round {self.sm.round} con {num_agents} modelos")
+            logging.info(f'Current agents: {self.sm.agent_set}')
+            
+            aggregation_start = time.time()
+            self.agg.aggregate_local_models()
+            aggregation_time = time.time() - aggregation_start
+            
+            # Guardar en DB
+            await self._update_db_barrier_state('distributing')
+            await self._push_cluster_models()
+            
+            # Incrementar ronda
+            self.sm.increment_round()
+            
+            # Log metrics
+            self.metrics_logger.log_round(
+                round_num=self.sm.round,
+                num_agents=len(self.sm.agent_set),
+                global_recall=self.last_global_recall,
+                aggregation_time=aggregation_time,
+                models_received=self.round_models_received,
+                bytes_received=self.round_bytes_received,
+                bytes_sent=self.round_bytes_sent,
+                rounds_without_improvement=self.rounds_without_improvement,
+                best_recall=self.best_global_recall if self.best_global_recall > 0 else None
+            )
+            
+            self.round_bytes_received = 0
+            self.round_bytes_sent = 0
+            self.round_models_received = 0
+            
+            # BARRERA 3: Verificar rotación (cada ronda con rotation_interval=1)
+            rounds_since_last_rotation = self.sm.round - self.last_rotation_round
+            should_rotate = (
+                self.sm.round >= self.rotation_min_rounds and
+                rounds_since_last_rotation >= self.rotation_interval and
+                len(self.sm.agent_set) > 0
+            )
+            
+            if should_rotate:
+                logging.info(f"🔄 BARRERA 3: Rotación en ronda {self.sm.round}")
+                logging.info(f"   Última rotación: ronda {self.last_rotation_round}")
+                await self._update_db_barrier_state('rotation')
+                await asyncio.sleep(self.rotation_delay)
+                await self._coordinated_rotation()
+                self.last_rotation_round = self.sm.round
             else:
-                # Ready for aggregation - reset timeout tracker
-                self.aggregation_start_time = None
-
-            if self.sm.ready_for_local_aggregation() or (self.aggregation_start_time is None and len(self.sm.local_models_buffer) > 0):  # if it has enough models to aggregate or timeout forced it
-                logging.info(f'Round {self.sm.round}')
-                logging.info(f'Current agents: {self.sm.agent_set}')
-
-                # Mark aggregation start time for metrics
-                aggregation_start = time.time()
-
-                # --- Local aggregation process --- #
-                # Local models --> An cluster model #
-                # Create a cluster model from local models
-                self.agg.aggregate_local_models()
-                
-                aggregation_time = time.time() - aggregation_start
-
-                # Push cluster model to DB
-                await self._push_cluster_models()
-
-                # In push mode, send cluster models immediately
-                if self.is_polling == False:
-                    await self._send_cluster_models_to_all()
-
-                # increment the aggregation round number
-                self.sm.increment_round()
-                
-                # Log aggregator metrics for this round
-                self.metrics_logger.log_round(
-                    round_num=self.sm.round,
-                    num_agents=len(self.sm.agent_set),
-                    global_recall=self.last_global_recall,  # Use last calculated recall
-                    aggregation_time=aggregation_time,
-                    models_received=self.round_models_received,
-                    bytes_received=self.round_bytes_received,
-                    bytes_sent=self.round_bytes_sent,
-                    rounds_without_improvement=self.rounds_without_improvement,
-                    best_recall=self.best_global_recall if self.best_global_recall > 0 else None
-                )
-                
-                # Reset round metrics
-                self.round_bytes_received = 0
-                self.round_bytes_sent = 0
-                self.round_models_received = 0
-                
-                # Check if rotation should occur AFTER incrementing round
-                # This ensures agents receive and train with the current round's model
-                # before rotation happens
-                should_rotate = (
-                    self.sm.round >= self.rotation_min_rounds and
-                    (self.sm.round - self.last_rotation_round) >= self.rotation_interval and
-                    len(self.sm.agent_set) > 0  # Safety: only rotate if we have agents
-                )
-                
-                if should_rotate:
-                    # Broadcast rotation and choose next aggregator
-                    logging.info(f"🔄 Initiating rotation at round {self.sm.round}")
-                    logging.info(f"⏳ Applying {self.rotation_delay}s delay before rotation activation...")
-                    await asyncio.sleep(self.rotation_delay)  # Give agents time to process current round
-                    await self._choose_and_broadcast_new_aggregator()
-                    self.last_rotation_round = self.sm.round
-                    logging.info(f"✅ Rotation activated at round {self.sm.round}")
+                # Resetear barrera para próxima ronda
+                await self._reset_db_barrier()
+    
+    async def _init_db_barrier(self, round_num: int, threshold: int, state: str):
+        """Inicializa barrera en DB"""
+        msg = [DBMsgType.init_barrier.value, round_num, threshold, self.sm.id, state]
+        await send(msg, self.db_ip, self.db_socket)
+    
+    async def _update_db_barrier_state(self, state: str):
+        """Actualiza estado de la barrera en DB"""
+        msg = [DBMsgType.update_barrier_state.value, state]
+        await send(msg, self.db_ip, self.db_socket)
+    
+    async def _reset_db_barrier(self):
+        """Resetea agentes listos en la barrera"""
+        msg = [DBMsgType.reset_barrier.value]
+        await send(msg, self.db_ip, self.db_socket)
+    
+    async def _wait_for_models_barrier(self, num_expected: int) -> bool:
+        """
+        Espera hasta que todos los agentes envíen sus modelos (barrera distribuida)
+        """
+        timeout = self.aggregation_timeout
+        start_time = time.time()
+        last_log_time = start_time
+        
+        while True:
+            num_models = len(self.sm.local_model_buffers[self.sm.mnames[0]]) if self.sm.mnames else 0
+            
+            # Verificar si todos los modelos llegaron
+            if num_models >= num_expected:
+                elapsed = time.time() - start_time
+                logging.info(f"✅ BARRERA COMPLETADA: {num_models}/{num_expected} modelos en {elapsed:.1f}s")
+                return True
+            
+            # Verificar timeout
+            elapsed = time.time() - start_time
+            if elapsed > timeout:
+                logging.warning(f"⏱️  TIMEOUT: Solo {num_models}/{num_expected} modelos en {timeout}s")
+                # Proceder con agregación parcial si hay al menos 1 modelo
+                return num_models > 0
+            
+            # Log progreso cada 30s
+            if time.time() - last_log_time >= 30:
+                remaining = timeout - elapsed
+                logging.info(f"⏳ [{int(elapsed)}s] Modelos: {num_models}/{num_expected} (quedan {int(remaining)}s)")
+                last_log_time = time.time()
+            
+            await asyncio.sleep(5)
+    
+    async def _coordinated_rotation(self):
+        """
+        Rotación coordinada con barrera distribuida
+        """
+        agents = list(self.sm.agent_set)
+        if not agents:
+            logging.warning("No hay agentes para rotación")
+            return
+        
+        # Elegir nuevo agregador
+        scores = {a['agent_id']: random.randint(1, 100) for a in agents}
+        scores[self.sm.id] = random.randint(1, 100)
+        
+        winner_id, winner_score = max(scores.items(), key=lambda x: (x[1], x[0]))
+        
+        # Determinar IP del ganador
+        if winner_id == self.sm.id:
+            winner_ip = self.aggr_ip
+            winner_sock = int(self.reg_socket)
+        else:
+            winner_ip, winner_sock = None, None
+            for agent in agents:
+                if agent['agent_id'] == winner_id:
+                    winner_ip = agent['agent_ip']
+                    winner_sock = int(agent['socket'])
+                    break
+        
+        if not winner_ip:
+            logging.error("Rotación abortada: IP del ganador no encontrada")
+            return
+        
+        logging.info(f"🏆 Nuevo agregador elegido: {winner_id[:8]}... (score: {winner_score})")
+        
+        # Preparar mensaje de rotación
+        model_id = self.sm.cluster_model_ids[-1] if self.sm.cluster_model_ids else ''
+        models = convert_LDict_to_Dict(self.sm.cluster_models)
+        rot_msg = generate_rotation_message(winner_id, winner_ip, winner_sock, model_id, self.sm.round, models, scores)
+        
+        if self.is_polling:
+            # Modo polling: guardar mensaje para entrega vía polling
+            self.pending_rotation_msg = rot_msg
+            self.rotation_winner_id = winner_id
+            self.rotation_notified_agents = set()
+            logging.info(f"📋 Rotación preparada para entrega vía polling")
+            # El exit ocurrirá en _process_polling después de que todos confirmen
+        else:
+            # Modo push: enviar directamente (no usado típicamente)
+            logging.info(f"Rotación broadcast (modo push) - no implementado")
+            os._exit(0)
 
     async def _send_cluster_models_to_all(self):
         """
@@ -620,96 +683,6 @@ class Server:
         models = convert_LDict_to_Dict(self.sm.cluster_models)
         meta_dict = dict({"num_samples" : self.sm.own_cluster_num_samples})
         return await self._push_models(self.sm.id, ModelType.cluster, models, model_id, time.time(), meta_dict)
-
-    async def _choose_and_broadcast_new_aggregator(self):
-        # Collect candidate agents (connected)
-        agents = list(self.sm.agent_set)
-        if not agents:
-            logging.info("No agents available for rotation.")
-            return
-
-        # Generate random scores (including self)
-        scores = {a['agent_id']: random.randint(1, 10) for a in agents}
-        scores[self.sm.id] = random.randint(1, 10)
-
-        winner, winner_score = max(scores.items(), key=lambda kv: (kv[1], kv[0]))
-
-        # Determine winner address
-        if winner == self.sm.id:
-            winner_ip = self.aggr_ip
-            winner_sock = int(self.reg_socket)
-        else:
-            winner_ip, winner_sock = None, None
-            for agent in agents:
-                if agent['agent_id'] == winner:
-                    winner_ip = agent['agent_ip']
-                    winner_sock = int(agent['socket'])
-                    break
-        if winner_ip is None:
-            logging.error("Rotation aborted: winner IP/socket not found")
-            return
-
-        model_id = self.sm.cluster_model_ids[-1] if self.sm.cluster_model_ids else ''
-        models = convert_LDict_to_Dict(self.sm.cluster_models)
-        rot_msg = generate_rotation_message(winner, winner_ip, winner_sock, model_id, self.sm.round, models, scores)
-        
-        # In polling mode, store rotation message for delivery via next poll
-        if self.is_polling:
-            self.pending_rotation_msg = rot_msg
-            self.rotation_winner_id = winner  # Store winner ID
-            self.rotation_notified_agents = set()  # Reset tracking
-            # Use in-memory agent count
-            num_agents_to_notify = len(self.sm.agent_set)
-            logging.info(f'🎯 Rotation prepared for polling delivery. Winner: {winner} ({winner_ip}:{winner_sock}) score {winner_score}')
-            logging.info(f'📋 Will wait for all {num_agents_to_notify} agents to poll and receive rotation message...')
-            # Exit will happen in _process_polling after all agents notified
-            return
-        else:
-            # Push mode: actively send rotation to agents
-            async def _send_rotation_direct(msg, ip, socket_num):
-                wsaddr = f'ws://{ip}:{socket_num}'
-                try:
-                    async with websockets.connect(wsaddr, ping_interval=None) as websocket:
-                        await websocket.send(pickle.dumps(msg))
-                    return True
-                except Exception as e:
-                    logging.debug(f'Rotation send attempt failed to {ip}:{socket_num} -> {e}')
-                    return False
-
-            winner_delivered = False
-            max_attempts = 5
-            for attempt in range(1, max_attempts + 1):
-                logging.info(f'Rotation broadcast attempt {attempt}/{max_attempts}')
-                for agent in agents:
-                    delivered = await _send_rotation_direct(rot_msg, agent['agent_ip'], int(agent['socket']))
-                    if delivered:
-                        logging.info(f'Rotation message delivered to {agent["agent_id"]} at {agent["agent_ip"]}:{agent["socket"]}')
-                    else:
-                        logging.warning(f'Rotation message NOT delivered to {agent["agent_id"]} at {agent["agent_ip"]}:{agent["socket"]}')
-                    if agent['agent_id'] == winner and delivered:
-                        winner_delivered = True
-                if winner_delivered:
-                    break
-                await asyncio.sleep(2)
-
-            if not winner_delivered:
-                logging.error('Rotation failed: winner did not receive rotation message after retries; keeping current role.')
-                return
-
-        # Persist config changes for this node (demote self)
-        try:
-            cfg_agent_file = set_config_file('agent')
-            cfg_agent = read_config(cfg_agent_file)
-            cfg_agent['role'] = 'agent'
-            cfg_agent['aggr_ip'] = winner_ip
-            # NOTE: reg_socket must stay at 8765 (registration port), don't change it
-            write_config(cfg_agent_file, cfg_agent)
-        except Exception as e:
-            logging.error(f'Failed to persist local config change after rotation: {e}')
-
-        logging.info(f'Rotation completed. New aggregator {winner} ({winner_ip}:{winner_sock}) score {winner_score}; exiting to yield role.')
-        os._exit(0)
-
 
     async def _push_models(self,
                            component_id: str,

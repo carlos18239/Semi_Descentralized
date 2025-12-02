@@ -35,6 +35,12 @@ class DBMsgType(Enum):
     clear_aggregator = 5
     get_agents_count = 6
     get_all_agents = 7
+    # Barreras distribuidas
+    init_barrier = 8
+    notify_barrier = 9
+    get_barrier_status = 10
+    update_barrier_state = 11
+    reset_barrier = 12
 
 class AgentMsgType(Enum):
     """

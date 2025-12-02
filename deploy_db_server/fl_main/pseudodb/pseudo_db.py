@@ -162,6 +162,43 @@ class PseudoDB:
                 agents_dict[agent_id] = score  # Usar score almacenado
             reply = ['agents', agents_dict]
             logging.info(f'   Returning {len(agents_dict)} agents with real scores')
+        
+        # ==================== HANDLERS DE BARRERAS ====================
+        elif msg_type == DBMsgType.init_barrier.value:  # inicializar barrera
+            # msg format: [msg_type, round_num, threshold, aggregator_id, state]
+            round_num = msg[1]
+            threshold = msg[2]
+            aggregator_id = msg[3]
+            state = msg[4] if len(msg) > 4 else 'registration'
+            logging.info(f'--- Init barrier: round={round_num}, threshold={threshold}, state={state} ---')
+            self.dbhandler.init_round_barrier(round_num, threshold, aggregator_id, state)
+            reply = ['barrier_initialized']
+            
+        elif msg_type == DBMsgType.notify_barrier.value:  # agente notifica llegada a barrera
+            # msg format: [msg_type, agent_id, round_num, phase]
+            agent_id = msg[1]
+            round_num = msg[2]
+            phase = msg[3]
+            logging.debug(f'--- Barrier notify: agent={agent_id[:8]}..., round={round_num}, phase={phase} ---')
+            self.dbhandler.notify_agent_barrier_arrival(agent_id, round_num, phase)
+            reply = ['barrier_notified']
+            
+        elif msg_type == DBMsgType.get_barrier_status.value:  # obtener estado de barrera
+            logging.debug(f'--- Get barrier status request ---')
+            status = self.dbhandler.get_barrier_status()
+            reply = ['barrier_status', status]
+            
+        elif msg_type == DBMsgType.update_barrier_state.value:  # actualizar estado de barrera
+            # msg format: [msg_type, new_state]
+            new_state = msg[1]
+            logging.info(f'--- Update barrier state: {new_state} ---')
+            self.dbhandler.update_barrier_state(new_state)
+            reply = ['barrier_state_updated']
+            
+        elif msg_type == DBMsgType.reset_barrier.value:  # resetear agentes listos en barrera
+            logging.debug(f'--- Reset barrier request ---')
+            self.dbhandler.reset_barrier_agents()
+            reply = ['barrier_reset']
             
         else:
             # Error for undefined message type

@@ -67,26 +67,28 @@ class StateManager:
             logging.error('❌ No se puede agregar: No hay agentes registrados en agent_set')
             return False
 
-        # Calculate required number of agents based on threshold
-        num_agents = int(self.agg_threshold * len(self.agent_set))
+        # Calculate required number of models based on threshold
+        # aggregation_threshold can be:
+        #   - Fraction (0.0 to 1.0): percentage of registered agents
+        #   - Integer >= 1: absolute number of agents
+        if self.agg_threshold <= 1.0:
+            # Treat as fraction (e.g., 0.5 = 50%, 1.0 = 100%)
+            num_required = max(1, int(self.agg_threshold * len(self.agent_set)))
+        else:
+            # Treat as absolute number (e.g., 2 = exactly 2 agents)
+            num_required = int(self.agg_threshold)
         
-        # STRICT: If threshold is 1.0 (100%), require ALL agents
-        if self.agg_threshold >= 1.0:
-            num_agents = len(self.agent_set)
-        elif num_agents == 0:
-            num_agents = 1  # Minimum 1 agent if threshold rounds to 0
-        
-        logging.info(f'📊 Umbral de Agregación: {self.agg_threshold} ({num_agents}/{len(self.agent_set)} agentes necesarios)')
+        logging.info(f'📊 Umbral de Agregación: {self.agg_threshold} → {num_required}/{len(self.agent_set)} agentes necesarios')
 
         num_collected_lmodels = len(self.local_model_buffers[self.mnames[0]])
-        logging.info(f'📥 Modelos locales recibidos: {num_collected_lmodels}/{num_agents}')
+        logging.info(f'📥 Modelos locales recibidos: {num_collected_lmodels}/{num_required}')
 
-        if num_collected_lmodels >= num_agents:
+        if num_collected_lmodels >= num_required:
             logging.info(f'✅ Suficientes modelos recolectados. ¡Iniciando agregación!')
             return True
         else:
-            missing = num_agents - num_collected_lmodels
-            logging.info(f'⏳ Esperando {missing} modelo(s) más: {num_collected_lmodels}/{num_agents}')
+            missing = num_required - num_collected_lmodels
+            logging.info(f'⏳ Esperando {missing} modelo(s) más: {num_collected_lmodels}/{num_required}')
             return False
 
     def initialize_model_info(self, lmodels, init_weights_flag):

@@ -149,13 +149,24 @@ def _average_aggregate(self, buffer: List[np.array], num_samples: List[int]):
   
   // Synchronization & Election Settings
   "expected_num_agents": 0,           // 0=no limit, N=wait for N agents
-  "registration_grace_period": 20,    // Seconds to wait for agent registration
+  "registration_grace_period": 30,    // Seconds to wait for agent registration
   "election_min_agents": 1,           // Minimum agents required for election
-  "aggregation_timeout": 120,         // Max wait time for model aggregation
-  "aggregation_threshold": 1.0        // Fraction of agents needed (1.0 = 100%)
+  "aggregation_timeout": 120,         // Max wait time for model aggregation (seconds)
+  "aggregation_threshold": 1.0,       // Models needed: <1.0=fraction, ≥1=absolute (1.0=100%)
+  
+  // Rotation Settings
+  "rotation_interval": 10,            // Rounds between rotations (default: 10)
+  "rotation_delay": 60                // Seconds to wait before rotation (default: 60s)
 }
 ```
-**Critical**: `device_ip` cannot be "CHANGE_ME" - scripts check and fail early.
+**Critical**: 
+- `device_ip` cannot be "CHANGE_ME" - scripts check and fail early
+- `aggregation_threshold`: 
+  - **1.0** = espera al 100% de agentes registrados (síncrono total)
+  - **0.5** = espera al 50% de agentes (tolerante a fallos)
+  - **2** (≥1) = espera exactamente 2 modelos (número absoluto)
+- `rotation_interval` controls frequency: 10 = rotate every 10 rounds
+- `rotation_delay` gives agents time to process final model before rotation
 
 ## Development Workflows
 
@@ -199,10 +210,12 @@ python -m fl_main.examples.tabular_ncd.tabular_engine 1 50001 agent1
 
 1. **Single aggregator at a time** - DB enforces via `current_aggregator` table (id=1 constraint)
 2. **Model architecture must match** - All nodes must use same `MLP(in_features=N)` dimension
-3. **Synchronization via grace period** - `registration_grace_period` (default: 20s) ensures all nodes register before election
+3. **Synchronization via grace period** - `registration_grace_period` (default: 30s) ensures all nodes register before election
 4. **Timeout-based aggregation** - Aggregator waits `aggregation_timeout` (default: 120s) before forcing partial aggregation
-5. **Binary protocol** - All messages use pickle; cannot inspect with plain text tools
-6. **No TLS** - WebSockets are unencrypted (ws:// not wss://)
+5. **Rotation frequency** - Aggregator rotates every `rotation_interval` rounds (default: 10 rounds)
+6. **Quorum requirement** - Aggregation requires `min_agents_for_aggregation` agents (default: 1)
+7. **Binary protocol** - All messages use pickle; cannot inspect with plain text tools
+8. **No TLS** - WebSockets are unencrypted (ws:// not wss://)
 
 ## Common Pitfalls
 
