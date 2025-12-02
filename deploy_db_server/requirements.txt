@@ -1,0 +1,2 @@
+websockets>=10.0
+getmac>=0.8.0

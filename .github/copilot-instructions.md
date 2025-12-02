@@ -1,71 +1,222 @@
-# Copilot / AI Agent Instructions for Simple-FL
+# Federated Learning - Semi-Decentralized Tabular Classification
 
-This file gives focused, actionable guidance for AI coding agents working in this repository.
+## Architecture Overview
 
-High-level architecture
-- **Components**: three core runtime roles: `Agent` (`fl_main/agent`), `Aggregator` (`fl_main/aggregator`), and `PseudoDB` (`fl_main/pseudodb`).
-- **State management**: Aggregators are **stateless** - they maintain state only in memory (`agent_set`, `round`). The **PseudoDB is the only component that persists data** (models, agent registry, aggregator info). Each Raspberry Pi that becomes an aggregator operates independently without local DB files.
-- **Message layer**: communication is implemented over WebSockets using pickled Python lists (`fl_main/lib/util/communication_handler.py`). Message field positions are defined in `fl_main/lib/util/states.py` and created by helper functions in `fl_main/lib/util/messengers.py`.
-- **Data flow**: Agents send local models → Aggregator buffers them → Aggregator aggregates (FedAvg) → Aggregator pushes cluster model to PseudoDB and distributes to Agents. Rotation can promote an Agent to Aggregator.
+**Semi-decentralized FL system** with dynamic aggregator election for hospital mortality prediction (NCD classification).
 
-Essential developer workflows (quick commands)
-- Create environment (Linux):
-```
-conda env create -n federatedenv -f ./setups/federatedenv_linux.yaml
-conda activate federatedenv
-```
-- Run servers (order matters):
-```
-# 1) Start DB
-python -m fl_main.pseudodb.pseudo_db
+### Three-tier architecture:
+1. **PseudoDB Server** (`deploy_db_server/`) - Central SQLite coordinator storing models/metadata
+2. **Agent Nodes** (`deploy_node/`) - Hospital clients that train locally and can become aggregators
+3. **Dynamic Aggregator** - One agent auto-promotes to aggregate models via election protocol
 
-# 2) Start Aggregator
-python -m fl_main.aggregator.server_th
-
-# 3) Start one or more Agents (or use the supervisor)
-python -m fl_main.agent.role_supervisor    # preferred: restarts client, handles promotion
-# or start client directly (simulation example):
-python -m fl_main.agent.client 1 50001 a1
 ```
-- Example minimal MLEngine (simulation):
-```
-python -m examples.minimal.minimal_MLEngine 1 50001 a1
+┌─────────────┐         ┌──────────────┐
+│  PseudoDB   │◄────────┤  Agent Node  │ (Hospital 1)
+│  (Server)   │         │  + Dataset   │
+│  SQLite DB  │         └──────────────┘
+└──────┬──────┘         
+       │                ┌──────────────┐
+       ├────────────────┤  Agent Node  │ (Hospital 2)  
+       │                │  AGGREGATOR  │ ← Elected leader
+       │                └──────────────┘
+       │
+       └────────────────┤  Agent Node  │ (Hospital 3)
+                        └──────────────┘
 ```
 
-Project-specific conventions & patterns
-- Config files live in `setups/` and are loaded via `fl_main.lib.util.helpers.set_config_file()` which builds paths from the current working directory. Always run commands from the repository root.
-- **Device-specific configs**: Each Raspberry Pi device MUST have its own `device_ip` configured in both `config_agent.json` and `config_aggregator.json`. This ensures correct IP advertising during rotation. Use `setup_device_config.sh <r1|r2|r3>` to generate device-specific configs. Never commit configs with `device_ip: "CHANGE_ME"` to production deployments.
-- Model/state files: agent-local models and state files are saved under the path configured by `config_agent.json` (default `./data/agents/<agent_name>`). Filenames are `lms.binaryfile`, `gms.binaryfile`, and `state`.
-- Message format: messages are plain Python lists pickled before sending. The code uses numeric index enums in `states.py` (e.g. `ParticipateMSGLocation`, `ModelUpMSGLocation`, `GMDistributionMsgLocation`). Do not change list order without updating both sender and receiver.
-- ID generation: IDs and model IDs are SHA256 hashes (see `helpers.generate_id` & `generate_model_id`). They are non-deterministic in tests unless mocked.
-- Atomic config writes: `helpers.write_config()` writes to a `.tmp` then renames — keep this behavior when changing config persistence.
+**Key Pattern**: Nodes dynamically elect an aggregator via score-based election in DB. The aggregator role rotates using `role_supervisor.py` which switches between agent/aggregator modes.
 
-Concurrency & networking notes
-- Servers are asyncio-based using `websockets`. Server entrypoints use `communication_handler.init_fl_server/init_db_server/init_client_server`.
-- Aggregator background task: `Server.model_synthesis_routine()` (periodic aggregation). Agents register themselves via `register()` method.
-- **IMPORTANT**: Aggregators do NOT create local SQLite databases. All persistence is handled by the centralized PseudoDB server.
-- Client uses threads to run an asyncio client loop (`init_loop`) and a background server for receiving global models (`init_client_server`). Be careful when modifying threading/loop interactions.
+## Project Structure
 
-Important files to reference when changing functionality
-- Core runtime: `fl_main/agent/client.py`, `fl_main/agent/role_supervisor.py`, `fl_main/aggregator/server_th.py`, `fl_main/pseudodb/pseudo_db.py`.
-- Protocol & helpers: `fl_main/lib/util/states.py`, `fl_main/lib/util/messengers.py`, `fl_main/lib/util/communication_handler.py`, `fl_main/lib/util/helpers.py`, `fl_main/lib/util/data_struc.py`.
-- Examples and ML integration: `examples/image_classification/` and `examples/minimal/`.
+### deploy_db_server/ (Central Server)
+- `fl_main/pseudodb/pseudo_db.py` - WebSocket server handling model pushes, agent registration, aggregator election
+- `fl_main/pseudodb/sqlite_db.py` - DB schema: `local_models`, `cluster_models`, `agents`, `current_aggregator`
+- `setups/config_db.json` - Server IP/port configuration
+- **Run**: `./scripts/start.sh` or `python -m fl_main.pseudodb.pseudo_db`
 
-Testing and debugging tips specific to this repo
-- When `communication_handler.send()` returns `None`, it means either there was no response or the connection failed — code frequently treats `None` as "no reply"; when debugging network issues, enable DEBUG logs and confirm socket/port values in `setups/config_*.json`.
-- To simulate multiple agents on one machine, run multiple `examples.minimal.minimal_MLEngine` with different `gm_recv_port` and `agent_name` arguments.
-- Rotation behavior: controlled by `rotation_min_rounds` (default 1) and `rotation_interval` (default 3) in `config_aggregator.json`. Aggregator waits until round >= `rotation_min_rounds`, then rotates every `rotation_interval` rounds. With default values, rotation occurs at rounds 1, 4, 7, 10, etc. After rotation, all agents `os._exit(0)` and supervisors restart appropriate processes based on `role` field.
-- **Termination judges**: Two termination conditions (configured in `config_aggregator.json`):
-  1. **Juez 1 (Early Stopping)**: Training terminates if global recall doesn't improve for `early_stopping_patience` rounds (default 120). Improvement threshold is `early_stopping_min_delta` (default 0.0001).
-  2. **Juez 2 (Max Rounds)**: Training terminates if `max_rounds` is reached (default 100).
-  Agents send recall metrics via `AgentMsgType.recall_upload` after each training round. Aggregator calculates global recall (average) and tracks improvement. When termination condition is met, aggregator sends `AggMsgType.termination` to all agents via polling, and all processes exit gracefully.
-- **Database architecture**: The PseudoDB server (`fl_main/pseudodb/pseudo_db.py`) is the ONLY component that creates and manages the SQLite database. Aggregators are stateless and do NOT create local DB files - they maintain all state in memory (`agent_set`, `round`) and only push models to PseudoDB for persistence. This ensures each Raspberry Pi that becomes an aggregator doesn't create its own conflicting database.
-- **Log noise**: Background agent wait routine now uses `agent_wait_interval` (default 10s). `cleanup_old_agents` logs at INFO only when rows deleted; enable DEBUG to see periodic scans.
-- **Device configuration**: Use `setup_device_config.sh` to generate correct per-device configs. See `DEPLOYMENT.md` for detailed Raspberry Pi cluster setup.
+### deploy_node/ (Client Nodes - Raspberry Pi)
+- `fl_main/agent/client.py` - Agent client implementing FL protocol
+- `fl_main/aggregator/` - FedAvg aggregation logic (`aggregation.py`), state management
+- `fl_main/examples/tabular_ncd/` - **Domain-specific training engine**:
+  - `tabular_engine.py` - Main entry point with `training()`, `compute_performance()` hooks
+  - `mlp.py` - PyTorch MLP model (3-layer: Input→120→84→1)
+  - `data_preparation.py` - Preprocesses CSV using shared `preprocessor_global.joblib`
+  - `conversion.py` - Converts PyTorch models ↔ numpy arrays for network transmission
+- `setups/config_agent.json` - Node configuration: `device_ip`, `db_ip`, `role` (agent/aggregator)
+- **Run**: `./scripts/start.sh` → launches `fl_main.agent.role_supervisor`
 
-Guidance for AI code edits
-- Prefer focused, minimal changes. This codebase relies on strict message ordering and pickled objects — refactors that change list orders/types must update both ends and `messengers.py` and `states.py` simultaneously.
-- When adding new message fields, update both `messengers.generate_*` helpers and the corresponding `*MSGLocation` enum in `states.py`, and update all readers to use `int(...)` indexing as the codebase does.
-- For changes to concurrency (async/threads), add tests exercising a real socket (local `websockets`) or a small integration run: start PseudoDB → Aggregator → Agent(s) in separate terminals or subprocesses.
+## Communication Protocol
 
-For detailed deployment instructions, see `DEPLOYMENT.md`. If anything here is unclear or you'd like me to include more examples (e.g., a minimal unit test skeleton or CI commands), tell me what to expand.
+All communication via **WebSockets** + **pickle serialization**:
+
+### Message Types (see `fl_main/lib/util/states.py`):
+- `DBMsgType` - DB operations: `push`, `register_agent`, `elect_aggregator`, `get_aggregator`
+- `AgentMsgType` - Agent→Aggregator: `participate`, `update`, `polling`
+- `AggMsgType` - Aggregator→Agent: `welcome`, `update`, `rotation`, `termination`
+
+### Communication Flow:
+1. **Agent registers with DB**: `[DBMsgType.register_agent, agent_id, ip, socket, score]`
+2. **Registration grace period**: Agents wait `registration_grace_period` seconds (default: 20s) for others to register
+   - Polls DB every 2s to check agent count: `[DBMsgType.get_agents_count]`
+   - Exits early if `expected_num_agents` reached
+3. **Agent queries current aggregator**: `[DBMsgType.get_aggregator]` → receives `[aggregator_id, ip, socket]`
+4. **If no aggregator, triggers election**: 
+   - Queries ALL registered agents: `[DBMsgType.get_all_agents]` → receives `{agent_id: score}`
+   - Sends election request: `[DBMsgType.elect_aggregator, {all_scores}]`
+   - DB selects winner (highest score, tie-break by agent_id)
+5. **Winner becomes aggregator**, updates `role='aggregator'` in config
+6. **Agents send local models**: `[AgentMsgType.update, agent_id, model_id, models_dict, ...]`
+7. **Aggregator performs FedAvg**, pushes to DB, distributes global model
+
+**Timeout Protection**: Aggregator waits up to `aggregation_timeout` (default: 120s) for models before forcing partial aggregation.
+
+**Code utilities**: `fl_main/lib/util/communication_handler.py` - `send()`, `receive()`, `init_fl_server()`
+
+## Key Development Patterns
+
+### 1. Role Switching (Agent ↔ Aggregator)
+Nodes switch roles dynamically via `role_supervisor.py`:
+```python
+# Reads config['role'] in loop
+if role == 'aggregator':
+    subprocess.run(['python3', '-m', 'fl_main.aggregator.server_th'])
+else:  # agent
+    subprocess.run(['python3', '-m', 'fl_main.examples.tabular_ncd.tabular_engine'])
+```
+**Critical**: Always update `config_agent.json` when changing roles, not just in-memory state.
+
+### 2. Model Conversion (PyTorch ↔ Numpy)
+FL requires serializable formats for network transmission:
+```python
+from fl_main.examples.tabular_ncd.conversion import Converter
+cvtr = Converter.cvtr()
+models_dict = cvtr.convert_nn_to_dict_nparray(pytorch_model)  # For sending
+pytorch_model = cvtr.convert_dict_nparray_to_nn(models_dict)  # For training
+```
+**Pattern**: `Converter` is a singleton tracking model architecture (`in_features`).
+
+### 3. Data Loading (Tabular NCD Dataset)
+Each node has ONE file: `data/data.csv` with 22 columns including `is_premature_ncd` (binary target).
+```python
+from fl_main.examples.tabular_ncd.tabular_training import DataManager
+dm = DataManager.dm(cutoff_th=10, agent_name='a1')  # Singleton
+# Automatically loads from config['dataset_path'], applies preprocessor
+trainloader = dm.trainloader
+testloader = dm.testloader
+```
+**Important**: Preprocessor (`artifacts/preprocessor_global.joblib`) must be shared across all nodes for consistent feature encoding.
+
+### 4. FedAvg Aggregation
+Weighted average in `fl_main/aggregator/aggregation.py`:
+```python
+def _average_aggregate(self, buffer: List[np.array], num_samples: List[int]):
+    denominator = sum(num_samples)
+    model = (num_samples[0] / denominator) * buffer[0]
+    for i in range(1, len(buffer)):
+        model += (num_samples[i] / denominator) * buffer[i]
+    return model
+```
+**Each layer aggregated separately** - `mnames` = model layer names (e.g., `['fc1.weight', 'fc1.bias', ...]`).
+
+### 5. Logging & Metrics
+- **System logs**: `logging.info()` throughout codebase (no centralized config, defaults to console)
+- **Training metrics**: `fl_main/lib/util/metrics_logger.py` - CSV output to `metrics/metrics_{agent_name}.csv`
+  - Tracks: accuracy, recall, bytes, latency per round
+  - Usage: `logger = MetricsLogger(agent_name='a1')` → `logger.log_round(round_num, ...)`
+
+## Configuration Management
+
+### deploy_db_server/setups/config_db.json
+```json
+{
+  "db_ip": "172.23.211.160",  // Change to server's actual IP
+  "db_socket": "9017",
+  "db_name": "sample_data",
+  "db_model_path": "./db/models"
+}
+```
+
+### deploy_node/setups/config_agent.json
+```json
+{
+  "device_ip": "CHANGE_ME",  // MUST SET: Node's IP
+  "db_ip": "172.23.211.160", // Server IP
+  "role": "agent",           // Dynamic: "agent" or "aggregator"
+  "dataset_path": "data/data.csv",
+  "target_column": "is_premature_ncd",
+  "local_epochs": 5,
+  "batch_size": 32,
+  
+  // Synchronization & Election Settings
+  "expected_num_agents": 0,           // 0=no limit, N=wait for N agents
+  "registration_grace_period": 20,    // Seconds to wait for agent registration
+  "election_min_agents": 1,           // Minimum agents required for election
+  "aggregation_timeout": 120,         // Max wait time for model aggregation
+  "aggregation_threshold": 1.0        // Fraction of agents needed (1.0 = 100%)
+}
+```
+**Critical**: `device_ip` cannot be "CHANGE_ME" - scripts check and fail early.
+
+## Development Workflows
+
+### Starting the System
+1. **Server**: `cd deploy_db_server && ./scripts/start.sh`
+   - Creates SQLite DB at `db/sample_data.db`
+   - Listens on port 9017
+2. **Nodes**: `cd deploy_node && ./scripts/start.sh`
+   - Verifies dependencies (torch, pandas, websockets)
+   - Kills old processes on ports 4321, 7890, 8765
+   - Launches `role_supervisor.py` which starts training engine
+
+### Adding New Training Logic
+Modify `deploy_node/fl_main/examples/tabular_ncd/tabular_engine.py`:
+```python
+def training(models: Dict[str, np.ndarray], init_flag: bool) -> Dict[str, np.ndarray]:
+    # 1. Convert numpy → PyTorch: cvtr.convert_dict_nparray_to_nn(models)
+    # 2. Train locally with your logic
+    # 3. Convert back: cvtr.convert_nn_to_dict_nparray(trained_net)
+    return models_dict
+```
+**Hook into Client**: `client.py` calls `training()` after receiving global model.
+
+### Debugging Communication
+Check WebSocket message traces:
+```bash
+# In any Python file
+logging.basicConfig(level=logging.DEBUG)  # Enables detailed logs
+# Messages are pickled lists - check states.py for index meanings
+```
+**Common issue**: Port conflicts → scripts kill processes automatically but verify with `lsof -i:9017`.
+
+### Testing Locally (Simulation Mode)
+Nodes support simulation flag to override sockets:
+```bash
+python -m fl_main.examples.tabular_ncd.tabular_engine 1 50001 agent1
+# Args: simulation_flag, socket, agent_name
+```
+
+## Critical Constraints
+
+1. **Single aggregator at a time** - DB enforces via `current_aggregator` table (id=1 constraint)
+2. **Model architecture must match** - All nodes must use same `MLP(in_features=N)` dimension
+3. **Synchronization via grace period** - `registration_grace_period` (default: 20s) ensures all nodes register before election
+4. **Timeout-based aggregation** - Aggregator waits `aggregation_timeout` (default: 120s) before forcing partial aggregation
+5. **Binary protocol** - All messages use pickle; cannot inspect with plain text tools
+6. **No TLS** - WebSockets are unencrypted (ws:// not wss://)
+
+## Common Pitfalls
+
+- **"Connection lost to agent"** → Check firewall rules, verify IPs in config files match `ifconfig` output
+- **Dimension mismatch errors** → Ensure `preprocessor_global.joblib` matches training data features
+- **Election loops** → If aggregator crashes repeatedly, `role_supervisor.py` reverts to agent after 3 failures
+- **Stale aggregator** → DB cleanup happens on new elections; manually clear: `DELETE FROM current_aggregator WHERE id=1`
+- **Timeout de agregación** → Si los nodos son lentos, aumentar `aggregation_timeout` (default 120s → 180s o 300s)
+
+**📚 Ver guía completa:** `MANEJO_ERRORES.md` para diagnóstico detallado, configuración por escenario y solución de problemas
+
+## File Naming Conventions
+
+- `*_th.py` suffixes indicate threaded/async components (e.g., `server_th.py`)
+- `.binaryfile` extension for serialized models in `db/models/` (SHA256 hash filenames)
+- Config files always in `setups/` directory
+- Startup scripts always named `start.sh` in `scripts/`

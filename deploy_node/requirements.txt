@@ -1,0 +1,18 @@
+# Federated Learning - Tabular NCD Classification
+# Dependencias para Raspberry Pi (deploy_node)
+
+# Communication
+websockets>=10.0
+getmac>=0.8.0
+
+# Core ML
+torch>=1.9.0
+numpy>=1.19.0
+
+# Data Processing (para clasificación tabular)
+pandas>=1.3.0
+scikit-learn>=0.24.0
+joblib>=1.0.0
+
+# Optional: Para monitoreo
+tqdm>=4.60.0
