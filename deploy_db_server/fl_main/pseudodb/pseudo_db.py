@@ -75,8 +75,7 @@ class PseudoDB:
             # msg format: [msg_type, agent_id, ip, socket, score]
             agent_id, ip, socket, score = msg[1], msg[2], msg[3], msg[4]
             logging.info(f'--- Agent registration: {agent_id} at {ip}:{socket} (score: {score}) ---')
-            self.dbhandler.upsert_agent(agent_id, ip, socket)
-            # Store score temporarily for election (could use a separate table)
+            self.dbhandler.upsert_agent(agent_id, ip, socket, score)  # Pasar score a la DB
             reply.append('registered')
             
         elif msg_type == DBMsgType.get_aggregator.value:  # get current aggregator
@@ -96,14 +95,23 @@ class PseudoDB:
             logging.info(f'--- Aggregator election request with {len(scores)} candidates ---')
             
             if scores:
+                # Log all candidates with their scores
+                logging.info(f'📊 Candidatos y scores:')
+                for aid, sc in sorted(scores.items(), key=lambda x: x[1], reverse=True):
+                    # Show shortened agent_id for readability
+                    short_id = aid[:8] + '...' if len(aid) > 12 else aid
+                    logging.info(f'   - {short_id}: {sc} puntos')
+                
                 # Find winner (highest score, tie-break by agent_id)
                 winner_id = max(scores.items(), key=lambda x: (x[1], x[0]))[0]
-                logging.info(f'   Winner: {winner_id} (score: {scores[winner_id]})')
+                winner_score = scores[winner_id]
+                short_winner = winner_id[:8] + '...' if len(winner_id) > 12 else winner_id
+                logging.info(f'🏆 Ganador: {short_winner} con {winner_score} puntos')
                 
                 # Get winner's IP/socket from agents table
                 all_agents = self.dbhandler.get_all_agents()
                 winner_ip, winner_socket = None, None
-                for aid, ip, sock in all_agents:
+                for aid, ip, sock, score in all_agents:  # Ahora incluye score
                     if aid == winner_id:
                         winner_ip, winner_socket = ip, sock
                         break
@@ -147,18 +155,13 @@ class PseudoDB:
             
         elif msg_type == DBMsgType.get_all_agents.value:  # get all registered agents with scores
             logging.info(f'--- Get all agents request ---')
-            # For now, we don't store scores permanently, so generate mock scores
-            # In production, you'd store scores in agents table
+            # Recuperar scores REALES de la DB
             all_agents = self.dbhandler.get_all_agents()
-            import random
-            random.seed(42)  # Deterministic for same agents
             agents_dict = {}
-            for agent_id, ip, socket in all_agents:
-                # Generate consistent score based on agent_id hash
-                score = (hash(agent_id) % 100) + 1
-                agents_dict[agent_id] = score
+            for agent_id, ip, socket, score in all_agents:
+                agents_dict[agent_id] = score  # Usar score almacenado
             reply = ['agents', agents_dict]
-            logging.info(f'   Returning {len(agents_dict)} agents')
+            logging.info(f'   Returning {len(agents_dict)} agents with real scores')
             
         else:
             # Error for undefined message type

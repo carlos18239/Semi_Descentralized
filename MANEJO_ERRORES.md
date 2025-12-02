@@ -166,6 +166,31 @@ tail -f logs/aggregator.log | grep "Modelo local recibido"
 
 ---
 
+### Error 3b: "Ganó el nodo equivocado (score diferente)"
+
+**Síntoma (CORREGIDO):**
+```
+// Registro: .138 tiene score=81, .117 tiene score=7
+// Elección: .138 tiene score=12, .117 tiene score=89 ← ¡ERROR!
+🏆 Ganador: 172.23.211.117:8765 (score: 89)  # Pero debería ser .138
+```
+
+**Causa:** Los scores se regeneraban con hash en vez de usar los reales de registro
+
+**Solución (YA APLICADA):**
+- ✅ Tabla `agents` ahora almacena columna `score`
+- ✅ `upsert_agent()` guarda el score real durante registro
+- ✅ `get_all_agents()` retorna scores almacenados (no generados)
+- ✅ Elección usa scores REALES de la DB
+
+**Verificación:**
+```sql
+# Ver scores almacenados en DB
+sqlite3 deploy_db_server/db/sample_data.db "SELECT agent_id, ip, score FROM agents;"
+```
+
+---
+
 ### Error 4: "Connection lost to agent"
 
 **Síntoma:**

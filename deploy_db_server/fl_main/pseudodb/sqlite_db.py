@@ -37,6 +37,7 @@ class SQLiteDBHandler:
                         agent_id TEXT PRIMARY KEY,
                         ip TEXT,
                         socket INTEGER,
+                        score INTEGER,
                         last_seen TEXT)''')
         
         c.execute('''CREATE TABLE IF NOT EXISTS current_aggregator(
@@ -109,10 +110,10 @@ class SQLiteDBHandler:
             return 0
         return int(row[0])
     
-    def upsert_agent(self, agent_id: str, ip: str, socket: int):
+    def upsert_agent(self, agent_id: str, ip: str, socket: int, score: int = 50):
         """
-        Inserta o actualiza un agente con su ip y puerto (socket).
-        Si el agent_id ya existe, actualiza ip, socket y last_seen.
+        Inserta o actualiza un agente con su ip, puerto (socket) y score.
+        Si el agent_id ya existe, actualiza ip, socket, score y last_seen.
         """
         conn = sqlite3.connect(self.db_file)
         c = conn.cursor()
@@ -129,24 +130,25 @@ class SQLiteDBHandler:
             if row is not None:
                 existing_id = row[0]
                 if existing_id != agent_id:
-                    # Update the existing record with the new agent_id and last_seen
+                    # Update the existing record with the new agent_id, score and last_seen
                     c.execute('''
-                        UPDATE agents SET agent_id = ?, last_seen = ?, ip = ?, socket = ?
+                        UPDATE agents SET agent_id = ?, last_seen = ?, ip = ?, socket = ?, score = ?
                         WHERE ip = ? AND socket = ?;
-                    ''', (agent_id, now, ip, socket, ip, socket))
+                    ''', (agent_id, now, ip, socket, score, ip, socket))
                     conn.commit()
-                    logging.info(f"upsert_agent: updated existing row for ip={ip}, socket={socket} -> agent_id={agent_id}")
+                    logging.info(f"upsert_agent: updated existing row for ip={ip}, socket={socket} -> agent_id={agent_id}, score={score}")
                     return True
 
             # Otherwise, perform insert with upsert on agent_id (existing behaviour)
             c.execute('''
-                INSERT INTO agents(agent_id, ip, socket, last_seen)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO agents(agent_id, ip, socket, score, last_seen)
+                VALUES (?, ?, ?, ?, ?)
                 ON CONFLICT(agent_id) DO UPDATE SET
                     ip = excluded.ip,
                     socket = excluded.socket,
+                    score = excluded.score,
                     last_seen = excluded.last_seen;
-            ''', (agent_id, ip, socket, now))
+            ''', (agent_id, ip, socket, score, now))
             conn.commit()
             return True
         except Exception as e:
@@ -208,13 +210,13 @@ class SQLiteDBHandler:
     
     def get_all_agents(self):
         """
-        Obtiene todos los agentes registrados en la tabla agents.
-        :return: Lista de tuplas (agent_id, ip, socket)
+        Obtiene todos los agentes registrados en la tabla agents con sus scores.
+        :return: Lista de tuplas (agent_id, ip, socket, score)
         """
         try:
             conn = sqlite3.connect(self.db_file)
             c = conn.cursor()
-            c.execute("SELECT agent_id, ip, socket FROM agents")
+            c.execute("SELECT agent_id, ip, socket, score FROM agents")
             rows = c.fetchall()
             conn.close()
             return rows

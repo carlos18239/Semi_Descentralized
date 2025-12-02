@@ -41329,3 +41329,1232 @@ websockets.exceptions.ConnectionClosedError: no close frame received or sent
 2025-12-02 04:43:43 | DEBUG    | x half-closing TCP connection
 2025-12-02 04:43:43 | DEBUG    | = connection is CLOSED
 2025-12-02 04:43:43 | INFO     | connection closed
+2025-12-02 11:45:37 | INFO     | ============================================================
+2025-12-02 11:45:37 | INFO     | --- Pseudo DB Server Started ---
+2025-12-02 11:45:37 | INFO     | Log file: /home/carlos/Downloads/deployment_desentralizado-20251202T150031Z-1-001/deployment_desentralizado/Federated-Learning/deploy_db_server/logs/db_server.log
+2025-12-02 11:45:37 | INFO     | ============================================================
+2025-12-02 11:45:37 | DEBUG    | Raw MAC found: 3e:7c:c9:aa:96:25
+
+2025-12-02 11:45:37 | DEBUG    | Using selector: EpollSelector
+2025-12-02 11:46:34 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:34 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:34 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:34 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:34 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'lH9QO72SjUoCSpbInv13UA=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:34 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:34 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'Do+eIDKTtXRgZV1Qu0SxhQwW/Aw='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:34 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:34 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:34 | DEBUG    | server - event = data_received(<105 bytes>)
+2025-12-02 11:46:34 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95`\x00\x00\x00\x00\x00\x00\x00]\x94(K\x01\x8c@81668620deb131290db6de0941fb7bc038c9ce6104bb09708bb045161329ea13\x94\x8c\x0e172.23.211.138\x94M="KQe.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:34 | INFO     | Request Arrived
+2025-12-02 11:46:34 | DEBUG    | Request: [1, '81668620deb131290db6de0941fb7bc038c9ce6104bb09708bb045161329ea13', '172.23.211.138', 8765, 81]
+2025-12-02 11:46:34 | INFO     | --- Agent registration: 81668620deb131290db6de0941fb7bc038c9ce6104bb09708bb045161329ea13 at 172.23.211.138:8765 (score: 81) ---
+2025-12-02 11:46:34 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x11\x00\x00\x00\x00\x00\x00\x00]\x94\x8c\nregistered\x94a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:34 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:34 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:34 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:34 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:34 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:34 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:34 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:34 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:34 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:35 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:35 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:35 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:35 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:35 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'gnFF1R7c8hB92ZriCSHV1g=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:35 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:35 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'XZRgyblwkaj+1ipmCQQtuztyxos='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:35 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:35 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:35 | DEBUG    | server - event = data_received(<106 bytes>)
+2025-12-02 11:46:35 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95`\x00\x00\x00\x00\x00\x00\x00]\x94(K\x01\x8c@d96df847c206d5422b02770be15e850b1bffe9226a446eeee32bc6f88ca21bf8\x94\x8c\x0e172.23.211.247\x94M="K\x15e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:35 | INFO     | Request Arrived
+2025-12-02 11:46:35 | DEBUG    | Request: [1, 'd96df847c206d5422b02770be15e850b1bffe9226a446eeee32bc6f88ca21bf8', '172.23.211.247', 8765, 21]
+2025-12-02 11:46:35 | INFO     | --- Agent registration: d96df847c206d5422b02770be15e850b1bffe9226a446eeee32bc6f88ca21bf8 at 172.23.211.247:8765 (score: 21) ---
+2025-12-02 11:46:35 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x11\x00\x00\x00\x00\x00\x00\x00]\x94\x8c\nregistered\x94a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:35 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:35 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:35 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:35 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:35 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:35 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:35 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:35 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:35 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:35 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:35 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:35 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:35 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:35 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'goXdK6v2adFUX/BC1Q5UHg=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:35 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:35 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'LMMhssWIXV29EXvz+KMbw/3qNIU='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:35 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:35 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:35 | DEBUG    | server - event = data_received(<105 bytes>)
+2025-12-02 11:46:35 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95`\x00\x00\x00\x00\x00\x00\x00]\x94(K\x01\x8c@58ba24a67919919b35cb3bc35ad36ad44d2569c3a72bb3ed6e83ce61a1287252\x94\x8c\x0e172.23.211.117\x94M="K\x07e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:35 | INFO     | Request Arrived
+2025-12-02 11:46:35 | DEBUG    | Request: [1, '58ba24a67919919b35cb3bc35ad36ad44d2569c3a72bb3ed6e83ce61a1287252', '172.23.211.117', 8765, 7]
+2025-12-02 11:46:35 | INFO     | --- Agent registration: 58ba24a67919919b35cb3bc35ad36ad44d2569c3a72bb3ed6e83ce61a1287252 at 172.23.211.117:8765 (score: 7) ---
+2025-12-02 11:46:35 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x11\x00\x00\x00\x00\x00\x00\x00]\x94\x8c\nregistered\x94a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:35 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:35 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:35 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:35 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:35 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:35 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:35 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:35 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:35 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:37 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:37 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:37 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:37 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:37 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'iRMQkiv9uNzMz3QLiSgjCg=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:37 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:37 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'Avybc3QI+ai38FuhZ9kcZBccW3o='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:37 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:37 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:37 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:46:37 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:37 | INFO     | Request Arrived
+2025-12-02 11:46:37 | DEBUG    | Request: [6]
+2025-12-02 11:46:37 | INFO     | --- Get agents count request ---
+2025-12-02 11:46:37 | INFO     |    Registered agents count: 3
+2025-12-02 11:46:37 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x03e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:37 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:37 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:37 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:37 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:37 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:37 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:37 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:37 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:37 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:38 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:38 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:38 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:38 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:38 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'q9mQ+Fp3LOv98Q+PDk+93Q=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:38 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:38 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'nSxEjqY6JHCyuAyswMlPfINH8jQ='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:38 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:38 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:38 | DEBUG    | server - event = data_received(<106 bytes>)
+2025-12-02 11:46:38 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95`\x00\x00\x00\x00\x00\x00\x00]\x94(K\x01\x8c@bca7fce67a819b2e2670b8f6d84cd97ce8d34887ef9338fe3ebf2b4d06426eff\x94\x8c\x0e172.23.211.121\x94M="KDe.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:38 | INFO     | Request Arrived
+2025-12-02 11:46:38 | DEBUG    | Request: [1, 'bca7fce67a819b2e2670b8f6d84cd97ce8d34887ef9338fe3ebf2b4d06426eff', '172.23.211.121', 8765, 68]
+2025-12-02 11:46:38 | INFO     | --- Agent registration: bca7fce67a819b2e2670b8f6d84cd97ce8d34887ef9338fe3ebf2b4d06426eff at 172.23.211.121:8765 (score: 68) ---
+2025-12-02 11:46:38 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x11\x00\x00\x00\x00\x00\x00\x00]\x94\x8c\nregistered\x94a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:38 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:38 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:38 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:38 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:38 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:38 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:38 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:38 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:38 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:38 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:38 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:38 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:38 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:38 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', '612SJtaU6aKoSGd9kd12nQ=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:38 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:38 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'iMCsAwMOK3xgZcPq8erwXufy0gI='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:38 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:38 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:38 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:46:38 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:38 | INFO     | Request Arrived
+2025-12-02 11:46:38 | DEBUG    | Request: [6]
+2025-12-02 11:46:38 | INFO     | --- Get agents count request ---
+2025-12-02 11:46:38 | INFO     |    Registered agents count: 4
+2025-12-02 11:46:38 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:38 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:38 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:38 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:38 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:38 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:38 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:38 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:38 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:38 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:38 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:38 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:38 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:38 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:38 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'gXhPmWwSKv0yK8LHzolTpg=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:38 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:38 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', '/vBlzrofw26nY/r0CkpQStPDnIA='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:38 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:38 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:38 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:46:38 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:38 | INFO     | Request Arrived
+2025-12-02 11:46:38 | DEBUG    | Request: [6]
+2025-12-02 11:46:38 | INFO     | --- Get agents count request ---
+2025-12-02 11:46:38 | INFO     |    Registered agents count: 4
+2025-12-02 11:46:38 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:38 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:38 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:38 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:38 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:38 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:38 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:38 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:38 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:38 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:40 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:40 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:40 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:40 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:40 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'DYeCHfAY/RZOlwjIwfmJ5g=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:40 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:40 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'Sbws9kXcdzR+zM5j2agD1UHQagk='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:40 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:40 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:40 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:46:40 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:40 | INFO     | Request Arrived
+2025-12-02 11:46:40 | DEBUG    | Request: [6]
+2025-12-02 11:46:40 | INFO     | --- Get agents count request ---
+2025-12-02 11:46:40 | INFO     |    Registered agents count: 4
+2025-12-02 11:46:40 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:40 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:40 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:40 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:40 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:40 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:40 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:40 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:40 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:40 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:41 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:41 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:41 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:41 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:41 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'Ax99KHlkp695Wujjvbeynw=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:41 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:41 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'fJGiu0mVd7I6OYx1lx+CZp46qN0='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:41 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:41 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:41 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:46:41 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:41 | INFO     | Request Arrived
+2025-12-02 11:46:41 | DEBUG    | Request: [6]
+2025-12-02 11:46:41 | INFO     | --- Get agents count request ---
+2025-12-02 11:46:41 | INFO     |    Registered agents count: 4
+2025-12-02 11:46:41 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:41 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:41 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:41 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:41 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:41 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:41 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:41 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:41 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:41 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:41 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:41 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:41 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:41 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:41 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'bYbRX2TaQwuPTz+AzoGHKQ=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:41 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:41 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'ATN9rf+oEat+yki0rY3BUnxYBNI='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:41 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:41 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:41 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:46:41 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:41 | INFO     | Request Arrived
+2025-12-02 11:46:41 | DEBUG    | Request: [6]
+2025-12-02 11:46:41 | INFO     | --- Get agents count request ---
+2025-12-02 11:46:41 | INFO     |    Registered agents count: 4
+2025-12-02 11:46:41 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:41 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:41 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:41 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:41 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:41 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:41 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:41 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=9 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:41 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:41 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:41 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:41 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:41 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:41 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:41 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'S9Ihvq6WgKRHm9445QJr3A=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:41 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:41 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', '/NnnzeJlcTlPbavlEwTYEQn3ha4='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:41 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:41 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:41 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:46:41 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:41 | INFO     | Request Arrived
+2025-12-02 11:46:41 | DEBUG    | Request: [6]
+2025-12-02 11:46:41 | INFO     | --- Get agents count request ---
+2025-12-02 11:46:41 | INFO     |    Registered agents count: 4
+2025-12-02 11:46:41 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:41 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:41 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:41 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:41 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:41 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:41 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:41 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:41 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:41 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:44 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:44 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:44 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:44 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:44 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', '3M1KxND6RtdIDJZ4kVm+JQ=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:44 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:44 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'gpS5xeM3LR922CtCdzCdo2Uci+E='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:44 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:44 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:44 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:46:44 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:44 | INFO     | Request Arrived
+2025-12-02 11:46:44 | DEBUG    | Request: [6]
+2025-12-02 11:46:44 | INFO     | --- Get agents count request ---
+2025-12-02 11:46:44 | INFO     |    Registered agents count: 4
+2025-12-02 11:46:44 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:44 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:44 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:44 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:44 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:44 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:44 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:44 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:44 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:44 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:44 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:44 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:44 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:44 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:44 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'h/hQ8XRk9/VW6SecflSwNA=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:44 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:44 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'YwmsMR+HasP1HbGgkpGRoA1Tg5Q='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:44 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:44 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:44 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:46:44 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:44 | INFO     | Request Arrived
+2025-12-02 11:46:44 | DEBUG    | Request: [6]
+2025-12-02 11:46:44 | INFO     | --- Get agents count request ---
+2025-12-02 11:46:44 | INFO     |    Registered agents count: 4
+2025-12-02 11:46:44 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:44 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:44 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:44 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:44 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:44 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:44 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:44 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:44 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:44 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:44 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:44 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:44 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:44 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:44 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', '7lCLIIKGz9KM4i+2NPejzA=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:44 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:44 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'l8OIi2eR3sHLqIRCBewFUIyuL7c='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:44 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:44 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:44 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:46:44 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:44 | INFO     | Request Arrived
+2025-12-02 11:46:44 | DEBUG    | Request: [6]
+2025-12-02 11:46:44 | INFO     | --- Get agents count request ---
+2025-12-02 11:46:44 | INFO     |    Registered agents count: 4
+2025-12-02 11:46:44 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:44 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:44 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:44 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:44 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:44 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:44 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:44 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:44 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:44 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:44 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:44 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:44 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:44 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:44 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'VBm/kLJltp7nkaDtLSQtXA=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:44 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:44 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', '0E6pYYfZ3SQErYxG/OrwROQRQDA='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:44 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:44 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:44 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:46:44 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:44 | INFO     | Request Arrived
+2025-12-02 11:46:44 | DEBUG    | Request: [6]
+2025-12-02 11:46:44 | INFO     | --- Get agents count request ---
+2025-12-02 11:46:44 | INFO     |    Registered agents count: 4
+2025-12-02 11:46:44 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:44 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:44 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:44 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:44 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:44 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:44 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:44 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:44 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:44 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:47 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:47 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:47 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:47 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:47 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'FJwcPseszjHJuUPeqZMrCw=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:47 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:47 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'vq6BC0gGuM1VnrqcU6+5FNyxqls='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:47 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:47 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:47 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:46:47 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:47 | INFO     | Request Arrived
+2025-12-02 11:46:47 | DEBUG    | Request: [6]
+2025-12-02 11:46:47 | INFO     | --- Get agents count request ---
+2025-12-02 11:46:47 | INFO     |    Registered agents count: 4
+2025-12-02 11:46:47 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:47 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:47 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:47 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:47 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:47 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:47 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:47 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:47 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:47 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:47 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:47 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:47 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:47 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:47 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'Zp5iYNqEI6KUd9FoxzHwMA=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:47 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:47 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'TKXrP8U2k+QEXu+K0Lcw+Z/2tO8='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:47 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:47 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:47 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:46:47 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:47 | INFO     | Request Arrived
+2025-12-02 11:46:47 | DEBUG    | Request: [6]
+2025-12-02 11:46:47 | INFO     | --- Get agents count request ---
+2025-12-02 11:46:47 | INFO     |    Registered agents count: 4
+2025-12-02 11:46:47 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:47 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:47 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:47 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:47 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:47 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:47 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:47 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:47 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:47 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:47 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:47 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:47 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:47 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:47 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'dTD6jdXRUaBwy2kENZYwCA=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:47 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:47 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'ncr76WFAtQa3qV43scJnB/pqqlk='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:47 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:47 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:47 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:46:47 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:47 | INFO     | Request Arrived
+2025-12-02 11:46:47 | DEBUG    | Request: [6]
+2025-12-02 11:46:47 | INFO     | --- Get agents count request ---
+2025-12-02 11:46:47 | INFO     |    Registered agents count: 4
+2025-12-02 11:46:47 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:47 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:47 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:47 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:47 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:47 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:47 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:47 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:47 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:47 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:47 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:47 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:47 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:47 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:47 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', '868tcUuZa1RnZaxmUxqrzA=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:47 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:47 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'EiRC8Mxa/eY2S68a5EywhFNp3lw='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:47 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:47 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:47 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:46:47 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:47 | INFO     | Request Arrived
+2025-12-02 11:46:47 | DEBUG    | Request: [6]
+2025-12-02 11:46:47 | INFO     | --- Get agents count request ---
+2025-12-02 11:46:47 | INFO     |    Registered agents count: 4
+2025-12-02 11:46:47 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:47 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:47 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:47 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:47 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:47 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:47 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:47 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:47 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:47 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:50 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:50 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:50 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:50 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:50 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', '7iGKTJ712rAkr7guu6T1Hg=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:50 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:50 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'N/Uduqm/6gzluD2MA8oUiwVCDXg='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:50 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:50 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:50 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:46:50 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:50 | INFO     | Request Arrived
+2025-12-02 11:46:50 | DEBUG    | Request: [6]
+2025-12-02 11:46:50 | INFO     | --- Get agents count request ---
+2025-12-02 11:46:50 | INFO     |    Registered agents count: 4
+2025-12-02 11:46:50 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:50 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:50 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:50 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:50 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:50 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:50 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:50 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:50 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:50 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:50 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:50 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:50 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:50 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:50 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', '9AF8wAwJgGX3prJbeGRY5A=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:50 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:50 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'nfAAUT+ZFNzhNbMeTnI9r+aiRFM='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:50 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:50 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:50 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:46:50 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:50 | INFO     | Request Arrived
+2025-12-02 11:46:50 | DEBUG    | Request: [6]
+2025-12-02 11:46:50 | INFO     | --- Get agents count request ---
+2025-12-02 11:46:50 | INFO     |    Registered agents count: 4
+2025-12-02 11:46:50 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:50 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:50 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:50 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:50 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:50 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:50 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:50 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:50 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:50 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:50 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:50 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:50 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:50 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:50 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'OU4P5q5oPC60QAt6aWB5ZA=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:50 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:50 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'eDnsMzT7kDopBcyZtCGg593p9KA='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:50 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:50 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:50 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:46:50 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:50 | INFO     | Request Arrived
+2025-12-02 11:46:50 | DEBUG    | Request: [6]
+2025-12-02 11:46:50 | INFO     | --- Get agents count request ---
+2025-12-02 11:46:50 | INFO     |    Registered agents count: 4
+2025-12-02 11:46:50 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:50 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:50 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:50 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:50 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:50 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:50 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:50 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:50 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:50 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:50 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:50 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:50 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:50 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:50 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'Xn8LZzgN8zussIYspvgVug=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:50 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:50 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', '8Bt5avIDgALdZne7t1p9erArNKw='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:50 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:50 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:50 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:46:50 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:50 | INFO     | Request Arrived
+2025-12-02 11:46:50 | DEBUG    | Request: [6]
+2025-12-02 11:46:50 | INFO     | --- Get agents count request ---
+2025-12-02 11:46:50 | INFO     |    Registered agents count: 4
+2025-12-02 11:46:50 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:50 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:50 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:50 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:50 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:50 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:50 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:50 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:50 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:50 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:53 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:53 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:53 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:53 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:53 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'nMabrEdfw7wER4oDShj71Q=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:53 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:53 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'opt8/Q0MyzSQrS/GJt4VgVoLTl4='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:53 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:53 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:53 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:46:53 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:53 | INFO     | Request Arrived
+2025-12-02 11:46:53 | DEBUG    | Request: [6]
+2025-12-02 11:46:53 | INFO     | --- Get agents count request ---
+2025-12-02 11:46:53 | INFO     |    Registered agents count: 4
+2025-12-02 11:46:53 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:53 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:53 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:53 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:53 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:53 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:53 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:53 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:53 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:53 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:53 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:53 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:53 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:53 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:53 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'HmCslywyo6REt1NoT7LvsQ=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:53 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:53 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'f7zc6w82J5ODDip7xCHNT6aoxRE='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:53 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:53 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:53 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:46:53 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:53 | INFO     | Request Arrived
+2025-12-02 11:46:53 | DEBUG    | Request: [6]
+2025-12-02 11:46:53 | INFO     | --- Get agents count request ---
+2025-12-02 11:46:53 | INFO     |    Registered agents count: 4
+2025-12-02 11:46:53 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:53 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:53 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:53 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:53 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:53 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:53 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:53 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:53 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:53 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:53 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:53 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:53 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:53 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:53 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'kOAf0tH1qHbnXb/qTQK21w=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:53 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:53 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'tCDf7C1J/u9zmOHlW4jSXol4WPw='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:53 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:53 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:53 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:46:53 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:53 | INFO     | Request Arrived
+2025-12-02 11:46:53 | DEBUG    | Request: [6]
+2025-12-02 11:46:53 | INFO     | --- Get agents count request ---
+2025-12-02 11:46:53 | INFO     |    Registered agents count: 4
+2025-12-02 11:46:53 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:53 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:53 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:53 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:53 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:53 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:53 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:53 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:53 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:53 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:53 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:53 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:53 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:53 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:53 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'Ac7h/kKisubSP2bYE069CA=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:53 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:53 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'StnLGCc4VllYANZIuW6dzZsyH0g='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:53 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:53 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:53 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:46:53 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:53 | INFO     | Request Arrived
+2025-12-02 11:46:53 | DEBUG    | Request: [6]
+2025-12-02 11:46:53 | INFO     | --- Get agents count request ---
+2025-12-02 11:46:53 | INFO     |    Registered agents count: 4
+2025-12-02 11:46:53 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:53 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:53 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:53 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:53 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:53 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:54 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:54 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:54 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:54 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:56 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:56 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:56 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:56 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:56 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', '95lS2fqHSdCFX/gkADRyNA=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:56 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:56 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'VxSGxf83bCfcKtix67oFEQ28s/U='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:56 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:56 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:56 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:46:56 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:56 | INFO     | Request Arrived
+2025-12-02 11:46:56 | DEBUG    | Request: [6]
+2025-12-02 11:46:56 | INFO     | --- Get agents count request ---
+2025-12-02 11:46:56 | INFO     |    Registered agents count: 4
+2025-12-02 11:46:56 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:56 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:56 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:56 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:56 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:56 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:56 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:56 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:56 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:56 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:56 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:56 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:56 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:56 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:56 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'brQ1bx1b9ou0tp9tZWHHXg=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:56 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:56 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'YKBb8nz/OUSFJSx9GnELdweeQho='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:56 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:56 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:56 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:46:56 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:56 | INFO     | Request Arrived
+2025-12-02 11:46:56 | DEBUG    | Request: [6]
+2025-12-02 11:46:56 | INFO     | --- Get agents count request ---
+2025-12-02 11:46:56 | INFO     |    Registered agents count: 4
+2025-12-02 11:46:56 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:56 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:56 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:56 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:56 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:56 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:56 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:56 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=9 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:56 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:56 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:56 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:56 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:56 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:56 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:56 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'NJGwq8vAtf/JtxXY/yyrTQ=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:56 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:56 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'C4xB/zxTNoWuXjz/LWY+OCESfHc='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:56 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:56 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:56 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:46:56 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:56 | INFO     | Request Arrived
+2025-12-02 11:46:56 | DEBUG    | Request: [6]
+2025-12-02 11:46:56 | INFO     | --- Get agents count request ---
+2025-12-02 11:46:56 | INFO     |    Registered agents count: 4
+2025-12-02 11:46:56 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:56 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:56 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:56 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:56 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:56 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:56 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:56 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:56 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:56 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:57 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:57 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:57 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:57 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:57 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'CpkAe/z2v18vY+QICzB02Q=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:57 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:57 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', '0DIKp0Tnm1OXWh6mqcT7mYt5S4U='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:57 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:57 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:57 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:46:57 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:57 | INFO     | Request Arrived
+2025-12-02 11:46:57 | DEBUG    | Request: [6]
+2025-12-02 11:46:57 | INFO     | --- Get agents count request ---
+2025-12-02 11:46:57 | INFO     |    Registered agents count: 4
+2025-12-02 11:46:57 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:57 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:57 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:57 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:57 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:57 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:57 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:57 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:57 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:57 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:46:59 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:46:59 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:46:59 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:46:59 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:46:59 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'pJERBKVfdw1VAcPdIPF1Ng=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:46:59 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:46:59 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'qxWwIDu7f7gq77GRQnAu0UTXs40='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:46:59 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:46:59 | DEBUG    | server - state = OPEN
+2025-12-02 11:46:59 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:46:59 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:59 | INFO     | Request Arrived
+2025-12-02 11:46:59 | DEBUG    | Request: [6]
+2025-12-02 11:46:59 | INFO     | --- Get agents count request ---
+2025-12-02 11:46:59 | INFO     |    Registered agents count: 4
+2025-12-02 11:46:59 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:59 | DEBUG    | server - state = CLOSING
+2025-12-02 11:46:59 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:59 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:46:59 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:46:59 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:46:59 | DEBUG    | server - event = eof_received()
+2025-12-02 11:46:59 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:46:59 | DEBUG    | server - state = CLOSED
+2025-12-02 11:46:59 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:47:00 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:47:00 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:47:00 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:47:00 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:47:00 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=9 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:47:00 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:47:00 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'ToHpzZ0gLat6JiAk3GKADw=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:47:00 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:47:00 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'dkhtkbwKiS25CzP8HlnmH7rTb9g='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:47:00 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:47:00 | DEBUG    | server - state = OPEN
+2025-12-02 11:47:00 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:47:00 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:47:00 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'hZPWePD9P+B1S1YkjzmfwA=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:47:00 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:47:00 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'LvRePxtyf0/EtBURQJB+TuHkM10='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:47:00 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:47:00 | DEBUG    | server - state = OPEN
+2025-12-02 11:47:00 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:47:00 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:00 | INFO     | Request Arrived
+2025-12-02 11:47:00 | DEBUG    | Request: [6]
+2025-12-02 11:47:00 | INFO     | --- Get agents count request ---
+2025-12-02 11:47:00 | INFO     |    Registered agents count: 4
+2025-12-02 11:47:00 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:00 | DEBUG    | server - state = CLOSING
+2025-12-02 11:47:00 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:00 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:47:00 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:00 | INFO     | Request Arrived
+2025-12-02 11:47:00 | DEBUG    | Request: [6]
+2025-12-02 11:47:00 | INFO     | --- Get agents count request ---
+2025-12-02 11:47:00 | INFO     |    Registered agents count: 4
+2025-12-02 11:47:00 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:00 | DEBUG    | server - state = CLOSING
+2025-12-02 11:47:00 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:00 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:47:00 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=10 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:47:00 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:47:00 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:47:00 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:47:00 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:00 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:00 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:47:00 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'q/PZBtBU+yVbiHixiE8B+A=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:47:00 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:47:00 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', '5gM2eLkh3hHeJrOie6+rER1yD34='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:47:00 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:47:00 | DEBUG    | server - state = OPEN
+2025-12-02 11:47:00 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:47:00 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:47:00 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:47:00 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:00 | DEBUG    | server - event = eof_received()
+2025-12-02 11:47:00 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:47:00 | DEBUG    | server - state = CLOSED
+2025-12-02 11:47:00 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:47:00 | INFO     | Request Arrived
+2025-12-02 11:47:00 | DEBUG    | Request: [6]
+2025-12-02 11:47:00 | INFO     | --- Get agents count request ---
+2025-12-02 11:47:00 | INFO     |    Registered agents count: 4
+2025-12-02 11:47:00 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:00 | DEBUG    | server - state = CLOSING
+2025-12-02 11:47:00 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:00 | DEBUG    | server - event = eof_received()
+2025-12-02 11:47:00 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:47:00 | DEBUG    | server - state = CLOSED
+2025-12-02 11:47:00 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:47:00 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:47:00 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:00 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:47:00 | DEBUG    | server - event = eof_received()
+2025-12-02 11:47:00 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:47:00 | DEBUG    | server - state = CLOSED
+2025-12-02 11:47:00 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:47:02 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:47:02 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:47:02 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:47:02 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:47:02 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'DRecEvdeVoKDOF0z5DgQ/Q=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:47:02 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:47:02 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'Xw89xGI3N8SG0pWIrmaQg1+9gl0='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:47:02 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:47:02 | DEBUG    | server - state = OPEN
+2025-12-02 11:47:02 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:47:02 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:02 | INFO     | Request Arrived
+2025-12-02 11:47:02 | DEBUG    | Request: [6]
+2025-12-02 11:47:02 | INFO     | --- Get agents count request ---
+2025-12-02 11:47:02 | INFO     |    Registered agents count: 4
+2025-12-02 11:47:02 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:02 | DEBUG    | server - state = CLOSING
+2025-12-02 11:47:02 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:02 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:47:02 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:02 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:47:02 | DEBUG    | server - event = eof_received()
+2025-12-02 11:47:02 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:47:02 | DEBUG    | server - state = CLOSED
+2025-12-02 11:47:02 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:47:03 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:47:03 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:47:03 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:47:03 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:47:03 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=9 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:47:03 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:47:03 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'aiOj4/nfCBqPu8/OvPnMGQ=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:47:03 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:47:03 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'bH+RBoBIfFDpgUEY/ot5sw+INy8='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:47:03 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:47:03 | DEBUG    | server - state = OPEN
+2025-12-02 11:47:03 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:47:03 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:47:03 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'fuTSh8nCIyYOE+U4heRqlQ=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:47:03 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:47:03 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'SRO45CAeNsfltq97GeUCNuiOmss='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:47:03 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:47:03 | DEBUG    | server - state = OPEN
+2025-12-02 11:47:03 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:47:03 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:03 | INFO     | Request Arrived
+2025-12-02 11:47:03 | DEBUG    | Request: [6]
+2025-12-02 11:47:03 | INFO     | --- Get agents count request ---
+2025-12-02 11:47:03 | INFO     |    Registered agents count: 4
+2025-12-02 11:47:03 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:03 | DEBUG    | server - state = CLOSING
+2025-12-02 11:47:03 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:03 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:47:03 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:03 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:47:03 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:03 | INFO     | Request Arrived
+2025-12-02 11:47:03 | DEBUG    | Request: [6]
+2025-12-02 11:47:03 | INFO     | --- Get agents count request ---
+2025-12-02 11:47:03 | INFO     |    Registered agents count: 4
+2025-12-02 11:47:03 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:03 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:47:03 | DEBUG    | server - state = CLOSING
+2025-12-02 11:47:03 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:03 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:47:03 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=10 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:47:03 | DEBUG    | server - event = eof_received()
+2025-12-02 11:47:03 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:47:03 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:47:03 | DEBUG    | server - state = CLOSED
+2025-12-02 11:47:03 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:47:03 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:03 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:47:03 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:47:03 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:47:03 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 's39FTlJPpi3rCZd5/YBr8Q=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:47:03 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:47:03 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'btzW5dZbDz+wqr5HhGIARMHjvDI='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:47:03 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:47:03 | DEBUG    | server - state = OPEN
+2025-12-02 11:47:03 | DEBUG    | server - event = eof_received()
+2025-12-02 11:47:03 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:47:03 | DEBUG    | server - state = CLOSED
+2025-12-02 11:47:03 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:47:03 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:47:03 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:03 | INFO     | Request Arrived
+2025-12-02 11:47:03 | DEBUG    | Request: [6]
+2025-12-02 11:47:03 | INFO     | --- Get agents count request ---
+2025-12-02 11:47:03 | INFO     |    Registered agents count: 4
+2025-12-02 11:47:03 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:03 | DEBUG    | server - state = CLOSING
+2025-12-02 11:47:03 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:03 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:47:03 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:03 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:47:03 | DEBUG    | server - event = eof_received()
+2025-12-02 11:47:03 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:47:03 | DEBUG    | server - state = CLOSED
+2025-12-02 11:47:03 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:47:06 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:47:06 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:47:06 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:47:06 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:47:06 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'hTRir07SvacmJEMlu9lCeA=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:47:06 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:47:06 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'amlyse0txDmfXW9pvlALM89uNTg='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:47:06 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:47:06 | DEBUG    | server - state = OPEN
+2025-12-02 11:47:06 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:47:06 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | INFO     | Request Arrived
+2025-12-02 11:47:06 | DEBUG    | Request: [6]
+2025-12-02 11:47:06 | INFO     | --- Get agents count request ---
+2025-12-02 11:47:06 | INFO     |    Registered agents count: 4
+2025-12-02 11:47:06 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | DEBUG    | server - state = CLOSING
+2025-12-02 11:47:06 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:47:06 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:47:06 | DEBUG    | server - event = eof_received()
+2025-12-02 11:47:06 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:47:06 | DEBUG    | server - state = CLOSED
+2025-12-02 11:47:06 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:47:06 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:47:06 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:47:06 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:47:06 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:47:06 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', '3Sasf0+Bg0JYXIR5HCupVA=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:47:06 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:47:06 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'nMr8HeSI8W63xiGOmZUwYtXKHSs='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:47:06 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:47:06 | DEBUG    | server - state = OPEN
+2025-12-02 11:47:06 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:47:06 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x02a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | INFO     | Request Arrived
+2025-12-02 11:47:06 | DEBUG    | Request: [2]
+2025-12-02 11:47:06 | INFO     | --- Get current aggregator request ---
+2025-12-02 11:47:06 | INFO     |    No aggregator registered yet
+2025-12-02 11:47:06 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x14\x00\x00\x00\x00\x00\x00\x00]\x94\x8c\rno_aggregator\x94a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | DEBUG    | server - state = CLOSING
+2025-12-02 11:47:06 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:47:06 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:47:06 | DEBUG    | server - event = eof_received()
+2025-12-02 11:47:06 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:47:06 | DEBUG    | server - state = CLOSED
+2025-12-02 11:47:06 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:47:06 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:47:06 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:47:06 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:47:06 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:47:06 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'EVR1qvMdPWIHqIbUHgrq6A=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:47:06 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:47:06 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'WDN+a/6e3UuVjPlR5jgdWHxDEyk='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:47:06 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:47:06 | DEBUG    | server - state = OPEN
+2025-12-02 11:47:06 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:47:06 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x07a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | INFO     | Request Arrived
+2025-12-02 11:47:06 | DEBUG    | Request: [7]
+2025-12-02 11:47:06 | INFO     | --- Get all agents request ---
+2025-12-02 11:47:06 | INFO     |    Returning 4 agents
+2025-12-02 11:47:06 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95&\x01\x00\x00\x00\x00\x00\x00]\x94(\x8c\x06agents\x94}\x94(\x8c@81668620deb131290db6de0941fb7bc038c9ce6104bb09708bb045161329ea13\x94K\x0c\x8c@d96df847c206d5422b02770be15e850b1bffe9226a446eeee32bc6f88ca21bf8\x94K\x16\x8c@58ba24a67919919b35cb3bc35ad36ad44d2569c3a72bb3ed6e83ce61a1287252\x94KY\x8c@bca7fce67a819b2e2670b8f6d84cd97ce8d34887ef9338fe3ebf2b4d06426eff\x94KFue.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | DEBUG    | server - state = CLOSING
+2025-12-02 11:47:06 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:47:06 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:47:06 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:47:06 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=9 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:47:06 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:47:06 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:47:06 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'nGM2UJgSn/wirm/Y53rdZA=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:47:06 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:47:06 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'Wnj595fDc+qQChY3K9x6z1i/ud8='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:47:06 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:47:06 | DEBUG    | server - state = OPEN
+2025-12-02 11:47:06 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:47:06 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=10 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:47:06 | DEBUG    | server - event = eof_received()
+2025-12-02 11:47:06 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:47:06 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:47:06 | DEBUG    | server - state = CLOSED
+2025-12-02 11:47:06 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:47:06 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:47:06 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'KXS4OrnJ6dGkbnSlNJSjlw=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:47:06 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:47:06 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', '7ywAHxkOr6yNSkgnuz47bwMTIYs='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:47:06 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:47:06 | DEBUG    | server - state = OPEN
+2025-12-02 11:47:06 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:47:06 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:47:06 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:47:06 | INFO     | Request Arrived
+2025-12-02 11:47:06 | DEBUG    | Request: [6]
+2025-12-02 11:47:06 | INFO     | --- Get agents count request ---
+2025-12-02 11:47:06 | INFO     |    Registered agents count: 4
+2025-12-02 11:47:06 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:47:06 | DEBUG    | server - state = CLOSING
+2025-12-02 11:47:06 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:47:06 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', '8gUvSVZpVlY9SDd3eB7+DA=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:47:06 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:47:06 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'TytBY37/6t3Wx4/G+Ga8qiCEVZQ='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:47:06 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:47:06 | DEBUG    | server - state = OPEN
+2025-12-02 11:47:06 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:47:06 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | DEBUG    | server - event = data_received(<221 bytes>)
+2025-12-02 11:47:06 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:47:06 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x1f\x01\x00\x00\x00\x00\x00\x00]\x94(K\x03}\x94(\x8c@81668620deb131290db6de0941fb7bc038c9ce6104bb09708bb045161329ea13\x94K\x0c\x8c@d96df847c206d5422b02770be15e850b1bffe9226a446eeee32bc6f88ca21bf8\x94K\x16\x8c@58ba24a67919919b35cb3bc35ad36ad44d2569c3a72bb3ed6e83ce61a1287252\x94KY\x8c@bca7fce67a819b2e2670b8f6d84cd97ce8d34887ef9338fe3ebf2b4d06426eff\x94KFue.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | INFO     | Request Arrived
+2025-12-02 11:47:06 | DEBUG    | Request: [6]
+2025-12-02 11:47:06 | INFO     | --- Get agents count request ---
+2025-12-02 11:47:06 | INFO     |    Registered agents count: 4
+2025-12-02 11:47:06 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:47:06 | DEBUG    | server - state = CLOSING
+2025-12-02 11:47:06 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | INFO     | Request Arrived
+2025-12-02 11:47:06 | DEBUG    | Request: [3, {'81668620deb131290db6de0941fb7bc038c9ce6104bb09708bb045161329ea13': 12, 'd96df847c206d5422b02770be15e850b1bffe9226a446eeee32bc6f88ca21bf8': 22, '58ba24a67919919b35cb3bc35ad36ad44d2569c3a72bb3ed6e83ce61a1287252': 89, 'bca7fce67a819b2e2670b8f6d84cd97ce8d34887ef9338fe3ebf2b4d06426eff': 70}]
+2025-12-02 11:47:06 | INFO     | --- Aggregator election request with 4 candidates ---
+2025-12-02 11:47:06 | INFO     |    Winner: 58ba24a67919919b35cb3bc35ad36ad44d2569c3a72bb3ed6e83ce61a1287252 (score: 89)
+2025-12-02 11:47:06 | INFO     | Updated current aggregator: 58ba24a67919919b35cb3bc35ad36ad44d2569c3a72bb3ed6e83ce61a1287252 at 172.23.211.117:8765
+2025-12-02 11:47:06 | INFO     |    Aggregator elected: 172.23.211.117:8765
+2025-12-02 11:47:06 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95h\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x07elected\x94\x8c@58ba24a67919919b35cb3bc35ad36ad44d2569c3a72bb3ed6e83ce61a1287252\x94\x8c\x0e172.23.211.117\x94M="KYe.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | DEBUG    | server - state = CLOSING
+2025-12-02 11:47:06 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:47:06 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:47:06 | DEBUG    | server - event = eof_received()
+2025-12-02 11:47:06 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:47:06 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:47:06 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:47:06 | DEBUG    | server - state = CLOSED
+2025-12-02 11:47:06 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:47:06 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=11 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:47:06 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:47:06 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:47:06 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:47:06 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', '0AI2lAfqEtlHJgVSwKLasg=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:47:06 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:47:06 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'mTv6F20j4Xp2gImL9PNieXZB5g8='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:47:06 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:47:06 | DEBUG    | server - state = OPEN
+2025-12-02 11:47:06 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:47:06 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=9 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:47:06 | DEBUG    | server - event = eof_received()
+2025-12-02 11:47:06 | DEBUG    | server - event = eof_received()
+2025-12-02 11:47:06 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:47:06 | DEBUG    | server - state = CLOSED
+2025-12-02 11:47:06 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:47:06 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:47:06 | DEBUG    | server - state = CLOSED
+2025-12-02 11:47:06 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:47:06 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:47:06 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:47:06 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', '6RqT6afEhe5VShqRKN68uQ=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:47:06 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:47:06 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'hIG2SEHyC9hz1Wvdux50ylp5mss='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:47:06 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:47:06 | DEBUG    | server - state = OPEN
+2025-12-02 11:47:06 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:47:06 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | INFO     | Request Arrived
+2025-12-02 11:47:06 | DEBUG    | Request: [6]
+2025-12-02 11:47:06 | INFO     | --- Get agents count request ---
+2025-12-02 11:47:06 | INFO     |    Registered agents count: 4
+2025-12-02 11:47:06 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | DEBUG    | server - state = CLOSING
+2025-12-02 11:47:06 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:47:06 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x02a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | INFO     | Request Arrived
+2025-12-02 11:47:06 | DEBUG    | Request: [2]
+2025-12-02 11:47:06 | INFO     | --- Get current aggregator request ---
+2025-12-02 11:47:06 | INFO     |    Current aggregator: 172.23.211.117:8765
+2025-12-02 11:47:06 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95i\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\naggregator\x94\x8c@58ba24a67919919b35cb3bc35ad36ad44d2569c3a72bb3ed6e83ce61a1287252\x94\x8c\x0e172.23.211.117\x94M="e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | DEBUG    | server - state = CLOSING
+2025-12-02 11:47:06 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:47:06 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:47:06 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:47:06 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:47:06 | DEBUG    | server - event = eof_received()
+2025-12-02 11:47:06 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:47:06 | DEBUG    | server - state = CLOSED
+2025-12-02 11:47:06 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:47:06 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:47:06 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:47:06 | DEBUG    | server - event = eof_received()
+2025-12-02 11:47:06 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:47:06 | DEBUG    | server - state = CLOSED
+2025-12-02 11:47:06 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:47:06 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:47:06 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:47:06 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', '3aXVRdKkIVZIoiVfvdPnag=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:47:06 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:47:06 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', '0nyy3uFpDUcYgj7ykVr96V8rpr0='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:47:06 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:47:06 | DEBUG    | server - state = OPEN
+2025-12-02 11:47:06 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:47:06 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x02a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | INFO     | Request Arrived
+2025-12-02 11:47:06 | DEBUG    | Request: [2]
+2025-12-02 11:47:06 | INFO     | --- Get current aggregator request ---
+2025-12-02 11:47:06 | INFO     |    Current aggregator: 172.23.211.117:8765
+2025-12-02 11:47:06 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95i\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\naggregator\x94\x8c@58ba24a67919919b35cb3bc35ad36ad44d2569c3a72bb3ed6e83ce61a1287252\x94\x8c\x0e172.23.211.117\x94M="e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | DEBUG    | server - state = CLOSING
+2025-12-02 11:47:06 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:47:06 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:06 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:47:06 | DEBUG    | server - event = eof_received()
+2025-12-02 11:47:06 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:47:06 | DEBUG    | server - state = CLOSED
+2025-12-02 11:47:06 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:47:09 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:47:09 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:47:09 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:47:09 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:47:09 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=9 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:47:09 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:47:09 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'znhup99djJzxWQlteB6tiw=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:47:09 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:47:09 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'KuHbaKf+6lJlHlxmh0GmF4ezS90='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:47:09 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:47:09 | DEBUG    | server - state = OPEN
+2025-12-02 11:47:09 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:47:09 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:47:09 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'GAHir6/wvjWS6aezHwexmw=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:47:09 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:47:09 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', 'tpEjU9p6A7JUAMouRlT4+UzrK2g='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:47:09 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:47:09 | DEBUG    | server - state = OPEN
+2025-12-02 11:47:09 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:47:09 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:47:09 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x06a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:09 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x02a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:09 | INFO     | Request Arrived
+2025-12-02 11:47:09 | DEBUG    | Request: [6]
+2025-12-02 11:47:09 | INFO     | --- Get agents count request ---
+2025-12-02 11:47:09 | INFO     |    Registered agents count: 4
+2025-12-02 11:47:09 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x0cagents_count\x94K\x04e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:09 | INFO     | Request Arrived
+2025-12-02 11:47:09 | DEBUG    | Request: [2]
+2025-12-02 11:47:09 | INFO     | --- Get current aggregator request ---
+2025-12-02 11:47:09 | INFO     |    Current aggregator: 172.23.211.117:8765
+2025-12-02 11:47:09 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95i\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\naggregator\x94\x8c@58ba24a67919919b35cb3bc35ad36ad44d2569c3a72bb3ed6e83ce61a1287252\x94\x8c\x0e172.23.211.117\x94M="e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:09 | DEBUG    | server - state = CLOSING
+2025-12-02 11:47:09 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:09 | DEBUG    | server - state = CLOSING
+2025-12-02 11:47:09 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:09 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:47:09 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:09 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:47:09 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:47:09 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:09 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:47:09 | DEBUG    | server - event = eof_received()
+2025-12-02 11:47:09 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:47:09 | DEBUG    | server - state = CLOSED
+2025-12-02 11:47:09 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:47:09 | DEBUG    | server - event = eof_received()
+2025-12-02 11:47:09 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:47:09 | DEBUG    | server - state = CLOSED
+2025-12-02 11:47:09 | DEBUG    | server x code = 1000, reason = [no reason]
+2025-12-02 11:47:09 | DEBUG    | server - state = CONNECTING
+2025-12-02 11:47:09 | DEBUG    | server - event = connection_made(<_SelectorSocketTransport fd=8 read=idle write=<idle, bufsize=0>>)
+2025-12-02 11:47:09 | DEBUG    | server - event = data_received(<268 bytes>)
+2025-12-02 11:47:09 | DEBUG    | server < GET / HTTP/1.1
+2025-12-02 11:47:09 | DEBUG    | server < Headers([('Host', '172.23.211.109:9017'), ('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Key', 'qQixxnt6E9P9JaUc0sdGiw=='), ('Sec-WebSocket-Version', '13'), ('Sec-WebSocket-Extensions', 'permessage-deflate; client_max_window_bits'), ('User-Agent', 'Python/3.8 websockets/10.4')])
+2025-12-02 11:47:09 | DEBUG    | server > HTTP/1.1 101 Switching Protocols
+2025-12-02 11:47:09 | DEBUG    | server > Headers([('Upgrade', 'websocket'), ('Connection', 'Upgrade'), ('Sec-WebSocket-Accept', '0ov/eBZyMpcyqywTi6smEna4Mq8='), ('Sec-WebSocket-Extensions', 'permessage-deflate'), ('Date', 'Tue, 02 Dec 2025 16:47:09 GMT'), ('Server', 'Python/3.8 websockets/8.1')])
+2025-12-02 11:47:09 | DEBUG    | server - state = OPEN
+2025-12-02 11:47:09 | DEBUG    | server - event = data_received(<21 bytes>)
+2025-12-02 11:47:09 | DEBUG    | server < Frame(fin=True, opcode=2, data=b'\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00]\x94K\x02a.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:09 | INFO     | Request Arrived
+2025-12-02 11:47:09 | DEBUG    | Request: [2]
+2025-12-02 11:47:09 | INFO     | --- Get current aggregator request ---
+2025-12-02 11:47:09 | INFO     |    Current aggregator: 172.23.211.117:8765
+2025-12-02 11:47:09 | DEBUG    | server > Frame(fin=True, opcode=2, data=b'\x80\x04\x95i\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\naggregator\x94\x8c@58ba24a67919919b35cb3bc35ad36ad44d2569c3a72bb3ed6e83ce61a1287252\x94\x8c\x0e172.23.211.117\x94M="e.', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:09 | DEBUG    | server - state = CLOSING
+2025-12-02 11:47:09 | DEBUG    | server > Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:09 | DEBUG    | server - event = data_received(<8 bytes>)
+2025-12-02 11:47:09 | DEBUG    | server < Frame(fin=True, opcode=8, data=b'\x03\xe8', rsv1=False, rsv2=False, rsv3=False)
+2025-12-02 11:47:09 | DEBUG    | server x half-closing TCP connection
+2025-12-02 11:47:09 | DEBUG    | server - event = eof_received()
+2025-12-02 11:47:09 | DEBUG    | server - event = connection_lost(None)
+2025-12-02 11:47:09 | DEBUG    | server - state = CLOSED
+2025-12-02 11:47:09 | DEBUG    | server x code = 1000, reason = [no reason]
