@@ -53,16 +53,35 @@ class MetricsLogger:
         # Round start time tracker
         self.round_start_time = None
         
+        # Si el CSV existe, cargar bytes acumulativos de la última línea
+        if self.csv_file.exists():
+            try:
+                with open(self.csv_file, 'r', newline='') as f:
+                    reader = csv.DictReader(f)
+                    rows = list(reader)
+                    if rows:
+                        last_row = rows[-1]
+                        self.cumulative_bytes = int(last_row.get('bytes_cumulative', 0))
+                        logging.info(f"📈 Continuando métricas de {agent_name} desde: bytes_acum={self.cumulative_bytes}")
+                        # Append mode: no crear headers
+                        logging.info(f"MetricsLogger initialized (append mode): {self.csv_file}")
+                        return
+            except Exception as e:
+                logging.warning(f"⚠️  No se pudieron cargar valores acumulativos: {e}")
+        
         # Initialize CSV file with headers
         self._init_csv()
         
-        logging.info(f"MetricsLogger initialized: {self.csv_file}")
+        logging.info(f"MetricsLogger initialized (new file): {self.csv_file}")
     
     def _init_csv(self):
-        """Create CSV file with headers"""
-        with open(self.csv_file, 'w', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=self.headers)
-            writer.writeheader()
+        """Create CSV file with headers only if file doesn't exist"""
+        if not self.csv_file.exists():
+            with open(self.csv_file, 'w', newline='') as f:
+                writer = csv.DictWriter(f, fieldnames=self.headers)
+                writer.writeheader()
+        else:
+            logging.info(f"CSV already exists, appending to: {self.csv_file}")
     
     def start_round(self):
         """Mark the start of a round for timing"""
@@ -173,6 +192,22 @@ class AggregatorMetricsLogger:
         self.cumulative_models = 0
         self.cumulative_bytes_received = 0
         self.cumulative_bytes_sent = 0
+        
+        # Si el CSV existe, cargar valores acumulativos de la última línea
+        if self.csv_file.exists():
+            try:
+                with open(self.csv_file, 'r', newline='') as f:
+                    reader = csv.DictReader(f)
+                    rows = list(reader)
+                    if rows:
+                        last_row = rows[-1]
+                        self.cumulative_models = int(last_row.get('total_models_received', 0))
+                        self.cumulative_bytes_received = int(last_row.get('total_bytes_received', 0))
+                        self.cumulative_bytes_sent = int(last_row.get('total_bytes_sent', 0))
+                        logging.info(f"📈 Continuando métricas desde: modelos={self.cumulative_models}, "
+                                   f"bytes_rx={self.cumulative_bytes_received}, bytes_tx={self.cumulative_bytes_sent}")
+            except Exception as e:
+                logging.warning(f"⚠️  No se pudieron cargar valores acumulativos: {e}")
         
         self._init_csv()
         logging.info(f"AggregatorMetricsLogger initialized: {self.csv_file}")

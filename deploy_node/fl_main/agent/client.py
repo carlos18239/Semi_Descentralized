@@ -179,8 +179,8 @@ class Client:
             
             if len(all_agents) < election_min:
                 logging.warning(f'⚠️  Solo {len(all_agents)} agentes registrados (mínimo: {election_min})')
-                logging.info(f'⏳ Esperando 5s adicionales para más agentes...')
-                await asyncio.sleep(5)
+                logging.info(f'⏳ Esperando 3s adicionales para más agentes...')
+                await asyncio.sleep(3)
                 all_agents = await self._get_all_registered_agents_from_db()
             
             if len(all_agents) == 0:
@@ -198,7 +198,7 @@ class Client:
             # IMPORTANT: After election, re-query DB to get the ACTUAL winner
             # This handles race conditions where multiple agents request election
             # NOTE: verify_alive=False because winner hasn't started aggregator yet
-            await asyncio.sleep(3)  # Wait for election to settle
+            await asyncio.sleep(2)  # Wait for election to settle
             actual_agg_ip, actual_agg_socket = await self._discover_aggregator_from_db(verify_alive=False)
             
             if actual_agg_ip:
