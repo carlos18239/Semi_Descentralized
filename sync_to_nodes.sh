@@ -28,6 +28,7 @@ REMOTE_DIR="Carlos/Semi_Descentralized/deploy_node"
 FILES_TO_SYNC=(
     "fl_main/aggregator/server_th.py"
     "fl_main/lib/util/metrics_logger.py"
+    "fl_main/lib/util/helpers.py"
     "fl_main/agent/client.py"
     "setups/config_agent.json"
 )

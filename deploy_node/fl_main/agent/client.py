@@ -191,8 +191,30 @@ class Client:
             logging.info(f'📋 Candidatos: {list(all_agents.keys())}')
             logging.info(f'🎲 Scores: {all_agents}')
             
-            # Collect scores from ALL agents (use existing scores from registration)
-            scores = all_agents  # Dict[agent_id: score]
+            # BARRERA: Verificar que TODOS los agentes tengan scores válidos
+            logging.info(f'🚦 BARRERA PRE-ELECCIÓN: Verificando scores de {len(all_agents)} agentes...')
+            agents_with_scores = {aid: score for aid, score in all_agents.items() if score is not None and score > 0}
+            
+            if len(agents_with_scores) < len(all_agents):
+                missing = len(all_agents) - len(agents_with_scores)
+                logging.warning(f'⚠️  {missing} agente(s) sin score válido - esperando 3s...')
+                await asyncio.sleep(3)
+                # Re-consultar
+                all_agents = await self._get_all_registered_agents_from_db()
+                agents_with_scores = {aid: score for aid, score in all_agents.items() if score is not None and score > 0}
+            
+            if len(agents_with_scores) == 0:
+                logging.error('❌ Ningún agente tiene score válido - abortando elección')
+                return
+            
+            if len(agents_with_scores) < len(all_agents):
+                logging.warning(f'⚠️  Solo {len(agents_with_scores)}/{len(all_agents)} agentes con scores válidos')
+                logging.info('📊 Procediendo con elección parcial')
+            else:
+                logging.info(f'✅ Todos los {len(agents_with_scores)} agentes tienen scores - procediendo a elección')
+            
+            # Collect scores from agents with valid scores only
+            scores = agents_with_scores
             election_result = await self._elect_aggregator_via_db(scores)
             
             # IMPORTANT: After election, re-query DB to get the ACTUAL winner

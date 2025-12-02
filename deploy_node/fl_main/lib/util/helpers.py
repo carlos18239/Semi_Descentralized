@@ -47,16 +47,41 @@ def write_config(config_path: str, config: Dict[str, Any]):
 
 def generate_id() -> str:
     """
-    Generate a system-wide unique ID based on
-    MAC address and Instantiation time with a hash func (SHA256)
+    Generate or load a PERSISTENT system-wide unique ID.
+    The ID is stored in .agent_id file and reused across restarts.
+    This ensures the agent maintains the same ID after rotation/restart.
     :return: str - ID
     """
+    import os
+    id_file = os.path.join(os.getcwd(), '.agent_id')
+    
+    # Try to load existing ID
+    if os.path.exists(id_file):
+        try:
+            with open(id_file, 'r') as f:
+                agent_id = f.read().strip()
+                if agent_id and len(agent_id) == 64:  # Valid SHA256
+                    return agent_id
+        except Exception:
+            pass
+    
+    # Generate new ID if file doesn't exist or is invalid
     macaddr = gma()
     in_time = time.time()
-
     raw = f'{macaddr}{in_time}'
     hash_id = sha256(raw.encode('utf-8'))
-    return hash_id.hexdigest()
+    agent_id = hash_id.hexdigest()
+    
+    # Persist the ID
+    try:
+        with open(id_file, 'w') as f:
+            f.write(agent_id)
+    except Exception as e:
+        # Non-fatal, just log
+        import logging
+        logging.warning(f"Could not persist agent_id to {id_file}: {e}")
+    
+    return agent_id
 
 
 def generate_model_id(component_type: str, component_id: str, generation_time: float) -> str:

@@ -632,9 +632,19 @@ class Server:
         logging.info(f"👥 Agentes participantes en elección: {len(agents)}")
         logging.info(f"📋 IDs: {[a['agent_id'][:8] + '...' for a in agents]}")
         
-        # Elegir nuevo agregador
+        # BARRERA: Generar scores aleatorios para todos
+        logging.info(f"🚦 BARRERA DE ROTACIÓN: Generando scores aleatorios...")
         scores = {a['agent_id']: random.randint(1, 100) for a in agents}
         scores[self.sm.id] = random.randint(1, 100)
+        
+        # Verificar que todos los scores sean válidos
+        invalid_scores = [aid for aid, score in scores.items() if score is None or score <= 0]
+        if invalid_scores:
+            logging.error(f"❌ {len(invalid_scores)} agente(s) con scores inválidos: {invalid_scores}")
+            logging.error(f"   Abortando rotación - verificar generación de scores")
+            return
+        
+        logging.info(f"✅ Scores válidos para {len(scores)} participantes")
         logging.info(f"🎲 Scores generados: {[(k[:8] + '...', v) for k, v in scores.items()]}")
         
         winner_id, winner_score = max(scores.items(), key=lambda x: (x[1], x[0]))

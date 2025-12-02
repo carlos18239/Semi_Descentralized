@@ -18,10 +18,10 @@
   "round_interval": 2,
   "aggregation_threshold": 1.0,
   "expected_num_agents": 0,
-  "registration_grace_period": 30,
+  "registration_grace_period": 10,
   "election_min_agents": 1,
-  "aggregation_timeout": 120,
-  "rotation_delay": 60,
+  "aggregation_timeout": 30,
+  "rotation_delay": 10,
   "rotation_interval": 1,
   
   "dataset_path": "data/data.csv",
