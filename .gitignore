@@ -1,0 +1,48 @@
+# Agent ID persistente (único por nodo)
+deploy_node/setups/.agent_id
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# Database
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# Models
+*.binaryfile
+*.pt
+*.pth
+*.h5
+
+# Metrics
+metrics/*.csv
+
+# Data
+data/agents/
+data/*.csv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

@@ -48,40 +48,63 @@ def write_config(config_path: str, config: Dict[str, Any]):
 def generate_id() -> str:
     """
     Generate or load a PERSISTENT system-wide unique ID.
-    The ID is stored in .agent_id file and reused across restarts.
+    The ID is stored in setups/.agent_id file and reused across restarts.
     This ensures the agent maintains the same ID after rotation/restart.
     :return: str - ID
     """
     import os
-    id_file = os.path.join(os.getcwd(), '.agent_id')
+    import pathlib
     
-    # Try to load existing ID
-    if os.path.exists(id_file):
-        try:
-            with open(id_file, 'r') as f:
-                agent_id = f.read().strip()
-                if agent_id and len(agent_id) == 64:  # Valid SHA256
-                    return agent_id
-        except Exception:
-            pass
-    
-    # Generate new ID if file doesn't exist or is invalid
-    macaddr = gma()
-    in_time = time.time()
-    raw = f'{macaddr}{in_time}'
-    hash_id = sha256(raw.encode('utf-8'))
-    agent_id = hash_id.hexdigest()
-    
-    # Persist the ID
+    # Use setups directory (relative to project root) for persistence
     try:
-        with open(id_file, 'w') as f:
-            f.write(agent_id)
+        # Get project root (where setups/ directory exists)
+        project_root = pathlib.Path(__file__).parent.parent.parent.parent
+        id_file = project_root / 'setups' / '.agent_id'
+        
+        # Ensure setups directory exists
+        id_file.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Try to load existing ID
+        if id_file.exists():
+            try:
+                with open(id_file, 'r') as f:
+                    agent_id = f.read().strip()
+                    if agent_id and len(agent_id) == 64:  # Valid SHA256
+                        import logging
+                        logging.info(f"🔑 Agent ID loaded from {id_file}")
+                        return agent_id
+            except Exception as e:
+                import logging
+                logging.warning(f"Could not read existing agent_id: {e}")
+        
+        # Generate new ID if file doesn't exist or is invalid
+        macaddr = gma()
+        in_time = time.time()
+        raw = f'{macaddr}{in_time}'
+        hash_id = sha256(raw.encode('utf-8'))
+        agent_id = hash_id.hexdigest()
+        
+        # Persist the ID
+        try:
+            with open(id_file, 'w') as f:
+                f.write(agent_id)
+            import logging
+            logging.info(f"🔑 New Agent ID generated and saved to {id_file}")
+        except Exception as e:
+            import logging
+            logging.warning(f"Could not persist agent_id to {id_file}: {e}")
+        
+        return agent_id
+        
     except Exception as e:
-        # Non-fatal, just log
+        # Fallback to old behavior if path resolution fails
         import logging
-        logging.warning(f"Could not persist agent_id to {id_file}: {e}")
-    
-    return agent_id
+        logging.error(f"Failed to use persistent ID, generating ephemeral one: {e}")
+        macaddr = gma()
+        in_time = time.time()
+        raw = f'{macaddr}{in_time}'
+        hash_id = sha256(raw.encode('utf-8'))
+        return hash_id.hexdigest()
 
 
 def generate_model_id(component_type: str, component_id: str, generation_time: float) -> str:

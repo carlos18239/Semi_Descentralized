@@ -12,8 +12,9 @@ from fl_main.lib.util.helpers import set_config_file, read_config
 # server (replacing itself). Otherwise it restarts the client.
 
 # Motor de clasificación tabular para datos de defunciones hospitalarias
-CLIENT_MODULE = ['python3', '-m', 'fl_main.examples.tabular_ncd.tabular_engine']
-AGG_MODULE = ['python3', '-m', 'fl_main.aggregator.server_th']
+# Usar conda run para ejecutar en el entorno correcto
+CLIENT_MODULE = ['conda', 'run', '-n', 'federatedenv2', '--no-capture-output', 'python3', '-m', 'fl_main.examples.tabular_ncd.tabular_engine']
+AGG_MODULE = ['conda', 'run', '-n', 'federatedenv2', '--no-capture-output', 'python3', '-m', 'fl_main.aggregator.server_th']
 
 client_args = sys.argv[1:]
 

@@ -17,6 +17,17 @@ DEPLOY_DIR="$(dirname "$SCRIPT_DIR")"
 
 cd "$DEPLOY_DIR"
 
+# Activar entorno conda
+echo "🐍 Activando entorno conda federatedenv2..."
+eval "$(conda shell.bash hook)"
+conda activate federatedenv2 2>/dev/null || {
+    echo "❌ Error: No se pudo activar federatedenv2"
+    echo "   Ejecuta primero: conda activate federatedenv2"
+    exit 1
+}
+echo "   ✓ Entorno federatedenv2 activado"
+echo ""
+
 # Verificar configuración
 if [ ! -f "setups/config_db.json" ]; then
     echo "❌ Error: No se encontró setups/config_db.json"

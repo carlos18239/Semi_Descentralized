@@ -58,6 +58,17 @@ if [ ! -f "artifacts/preprocessor_global.joblib" ]; then
 fi
 
 # Verificar dependencias
+# Activar entorno conda
+echo "🐍 Activando entorno conda federatedenv2..."
+eval "$(conda shell.bash hook)"
+conda activate federatedenv2 2>/dev/null || {
+    echo "❌ Error: No se pudo activar federatedenv2"
+    echo "   Ejecuta primero: conda activate federatedenv2"
+    exit 1
+}
+echo "   ✓ Entorno federatedenv2 activado"
+echo ""
+
 echo "🔍 Verificando dependencias..."
 MISSING_DEPS=0
 
@@ -108,10 +119,60 @@ with open('setups/config_agent.json', 'w') as f:
 print("   ✓ role = 'agent', aggr_ip = '' (descubrimiento dinámico)")
 EOF
 
+# Verificar si ya hay un supervisor corriendo
+SUPERVISOR_RUNNING=$(ps aux | grep '[f]l_main.agent.role_supervisor' | grep -v grep)
+if [ -n "$SUPERVISOR_RUNNING" ]; then
+    echo "⚠️  Ya hay un role_supervisor corriendo:"
+    echo "$SUPERVISOR_RUNNING"
+    echo ""
+    read -p "¿Detener el proceso anterior y reiniciar? (s/N): " RESTART
+    if [ "$RESTART" = "s" ] || [ "$RESTART" = "S" ]; then
+        pkill -f "fl_main.agent.role_supervisor"
+        pkill -f "fl_main.aggregator.server_th"
+        pkill -f "fl_main.examples.tabular_ncd"
+        sleep 2
+        echo "✓ Procesos anteriores detenidos"
+    else
+        echo "❌ Cancelando inicio - supervisor ya corriendo"
+        exit 1
+    fi
+fi
+
 echo "🚀 Iniciando nodo Federated Learning..."
-echo "   (Presiona Ctrl+C para detener)"
 echo "=============================================="
 echo ""
+echo "Opciones de ejecución:"
+echo "  1) Modo interactivo (foreground - para desarrollo/debug)"
+echo "  2) Modo daemon (background - para producción)"
+echo ""
+read -p "Selecciona modo [1/2]: " MODE
 
-# Iniciar el supervisor de roles (maneja transiciones agent <-> aggregator)
-python3 -m fl_main.agent.role_supervisor
+if [ "$MODE" = "2" ]; then
+    # Modo daemon - background persistente
+    echo ""
+    echo "📋 Iniciando en modo daemon..."
+    echo "   Logs: logs/node_supervisor.log"
+    echo "   PID file: logs/supervisor.pid"
+    echo ""
+    
+    nohup python3 -m fl_main.agent.role_supervisor > logs/node_supervisor.log 2>&1 &
+    SUPERVISOR_PID=$!
+    echo $SUPERVISOR_PID > logs/supervisor.pid
+    
+    echo "✅ Supervisor iniciado (PID: $SUPERVISOR_PID)"
+    echo ""
+    echo "Comandos útiles:"
+    echo "  - Ver logs en vivo:  tail -f logs/node_supervisor.log"
+    echo "  - Detener nodo:      kill \$(cat logs/supervisor.pid)"
+    echo "  - Ver estado:        ps aux | grep role_supervisor"
+    echo ""
+else
+    # Modo interactivo - foreground
+    echo ""
+    echo "▶️  Modo interactivo (Presiona Ctrl+C para detener)"
+    echo "=============================================="
+    echo ""
+    
+    # Iniciar el supervisor de roles (maneja transiciones agent <-> aggregator)
+    python3 -m fl_main.agent.role_supervisor
+fi

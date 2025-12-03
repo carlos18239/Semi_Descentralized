@@ -30,7 +30,11 @@ FILES_TO_SYNC=(
     "fl_main/lib/util/metrics_logger.py"
     "fl_main/lib/util/helpers.py"
     "fl_main/agent/client.py"
+    "fl_main/agent/role_supervisor.py"
     "setups/config_agent.json"
+    "scripts/start.sh"
+    "scripts/stop.sh"
+    "scripts/status.sh"
 )
 
 echo -e "${YELLOW}Archivos a sincronizar:${NC}"
