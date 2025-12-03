@@ -44,40 +44,10 @@ echo "   IP Servidor: $DB_IP:$DB_PORT"
 echo "   Dir:         $DEPLOY_DIR"
 echo ""
 
-# Configurar archivo de datos según la IP del nodo
-if [ ! -f "data/data.csv" ]; then
-    echo "🔍 Detectando archivo de datos según IP del nodo..."
-    
-    case "$DEVICE_IP" in
-        "172.23.211.138")
-            DATA_FILE="data1.csv"
-            ;;
-        "172.23.211.117")
-            DATA_FILE="data2.csv"
-            ;;
-        "172.23.211.121")
-            DATA_FILE="data3.csv"
-            ;;
-        "172.23.211.247")
-            DATA_FILE="data4.csv"
-            ;;
-        *)
-            DATA_FILE="data1.csv"  # Por defecto
-            ;;
-    esac
-    
-    if [ -f "data/$DATA_FILE" ]; then
-        cp "data/$DATA_FILE" "data/data.csv"
-        echo "   ✓ Usando $DATA_FILE para este nodo"
-    else
-        echo "❌ Error: No se encontró data/$DATA_FILE"
-        exit 1
-    fi
-fi
-
-# Verificar que el archivo existe
+# Verificar datos
 if [ ! -f "data/data.csv" ]; then
     echo "❌ Error: No se encontró data/data.csv"
+    echo "   Copia el archivo CSV de datos del hospital a data/data.csv"
     exit 1
 fi
 
@@ -88,17 +58,6 @@ if [ ! -f "artifacts/preprocessor_global.joblib" ]; then
 fi
 
 # Verificar dependencias
-# Activar entorno conda
-echo "🐍 Activando entorno conda federatedenv2..."
-eval "$(conda shell.bash hook)"
-conda activate federatedenv2 2>/dev/null || {
-    echo "❌ Error: No se pudo activar federatedenv2"
-    echo "   Ejecuta primero: conda activate federatedenv2"
-    exit 1
-}
-echo "   ✓ Entorno federatedenv2 activado"
-echo ""
-
 echo "🔍 Verificando dependencias..."
 MISSING_DEPS=0
 
