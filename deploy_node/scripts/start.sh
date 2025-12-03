@@ -44,10 +44,40 @@ echo "   IP Servidor: $DB_IP:$DB_PORT"
 echo "   Dir:         $DEPLOY_DIR"
 echo ""
 
-# Verificar datos
+# Configurar archivo de datos según la IP del nodo
+if [ ! -f "data/data.csv" ]; then
+    echo "🔍 Detectando archivo de datos según IP del nodo..."
+    
+    case "$DEVICE_IP" in
+        "172.23.211.138")
+            DATA_FILE="data1.csv"
+            ;;
+        "172.23.211.117")
+            DATA_FILE="data2.csv"
+            ;;
+        "172.23.211.121")
+            DATA_FILE="data3.csv"
+            ;;
+        "172.23.211.247")
+            DATA_FILE="data4.csv"
+            ;;
+        *)
+            DATA_FILE="data1.csv"  # Por defecto
+            ;;
+    esac
+    
+    if [ -f "data/$DATA_FILE" ]; then
+        cp "data/$DATA_FILE" "data/data.csv"
+        echo "   ✓ Usando $DATA_FILE para este nodo"
+    else
+        echo "❌ Error: No se encontró data/$DATA_FILE"
+        exit 1
+    fi
+fi
+
+# Verificar que el archivo existe
 if [ ! -f "data/data.csv" ]; then
     echo "❌ Error: No se encontró data/data.csv"
-    echo "   Copia el archivo CSV de datos del hospital a data/data.csv"
     exit 1
 fi
 
@@ -119,60 +149,10 @@ with open('setups/config_agent.json', 'w') as f:
 print("   ✓ role = 'agent', aggr_ip = '' (descubrimiento dinámico)")
 EOF
 
-# Verificar si ya hay un supervisor corriendo
-SUPERVISOR_RUNNING=$(ps aux | grep '[f]l_main.agent.role_supervisor' | grep -v grep)
-if [ -n "$SUPERVISOR_RUNNING" ]; then
-    echo "⚠️  Ya hay un role_supervisor corriendo:"
-    echo "$SUPERVISOR_RUNNING"
-    echo ""
-    read -p "¿Detener el proceso anterior y reiniciar? (s/N): " RESTART
-    if [ "$RESTART" = "s" ] || [ "$RESTART" = "S" ]; then
-        pkill -f "fl_main.agent.role_supervisor"
-        pkill -f "fl_main.aggregator.server_th"
-        pkill -f "fl_main.examples.tabular_ncd"
-        sleep 2
-        echo "✓ Procesos anteriores detenidos"
-    else
-        echo "❌ Cancelando inicio - supervisor ya corriendo"
-        exit 1
-    fi
-fi
-
 echo "🚀 Iniciando nodo Federated Learning..."
+echo "   (Presiona Ctrl+C para detener)"
 echo "=============================================="
 echo ""
-echo "Opciones de ejecución:"
-echo "  1) Modo interactivo (foreground - para desarrollo/debug)"
-echo "  2) Modo daemon (background - para producción)"
-echo ""
-read -p "Selecciona modo [1/2]: " MODE
 
-if [ "$MODE" = "2" ]; then
-    # Modo daemon - background persistente
-    echo ""
-    echo "📋 Iniciando en modo daemon..."
-    echo "   Logs: logs/node_supervisor.log"
-    echo "   PID file: logs/supervisor.pid"
-    echo ""
-    
-    nohup python3 -m fl_main.agent.role_supervisor > logs/node_supervisor.log 2>&1 &
-    SUPERVISOR_PID=$!
-    echo $SUPERVISOR_PID > logs/supervisor.pid
-    
-    echo "✅ Supervisor iniciado (PID: $SUPERVISOR_PID)"
-    echo ""
-    echo "Comandos útiles:"
-    echo "  - Ver logs en vivo:  tail -f logs/node_supervisor.log"
-    echo "  - Detener nodo:      kill \$(cat logs/supervisor.pid)"
-    echo "  - Ver estado:        ps aux | grep role_supervisor"
-    echo ""
-else
-    # Modo interactivo - foreground
-    echo ""
-    echo "▶️  Modo interactivo (Presiona Ctrl+C para detener)"
-    echo "=============================================="
-    echo ""
-    
-    # Iniciar el supervisor de roles (maneja transiciones agent <-> aggregator)
-    python3 -m fl_main.agent.role_supervisor
-fi
+# Iniciar el supervisor de roles (maneja transiciones agent <-> aggregator)
+python3 -m fl_main.agent.role_supervisor
